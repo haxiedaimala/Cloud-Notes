@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {Ref, ref} from 'vue';
 
 const isShow = ref(true);
 const register = ref({
@@ -16,18 +16,20 @@ const login = ref({
 });
 const onShowRegister = () => isShow.value = true;
 const onShowLogin = () => isShow.value = false;
-const validUsername = (username: string) => {
-  return {
-    isValid: /^[a-zA-Z_\d\u4E00-\u9FA5]{3,15}$/.test(username),
-    notice: '用户名必须是3~15个字符，限数字字母下划线中文'
-  };
+const validInfo = (data: Ref<{ username: string, password: string, isError: boolean, notice: string }>) => {
+  const result1 = /^[a-zA-Z_\d\u4E00-\u9FA5]{3,15}$/.test(data.value.username);
+  const result2 = /^.{6,16}$/.test(data.value.password);
+  if (!result1 || !result2) {
+    data.value.isError = true;
+    data.value.notice = result1 ? '密码长度为6~16个字符' : '用户名必须是3~15个字符，限数字字母下划线中文';
+    return false;
+  }
+  data.value.isError = false;
+  data.value.notice = '';
+  return true;
 };
-const validPassword = (password: string) => {
-  return {
-    isValid: /^.{6,16}$/.test(password),
-    notice: '密码长度为6~16个字符'
-  };
-};
+const validRegister = () => validInfo(register);
+const validLogin = () => validInfo(login);
 const onRegister = () => {
   if (!validRegister()) return;
   //TODO 提交注册信息
@@ -37,40 +39,6 @@ const onLogin = () => {
   if (!validLogin()) return;
   //TODO 提交注册信息
   console.log('start login...,username:', login.value.username, 'password:', login.value.password);
-};
-const validRegister = () => {
-  const result1 = validUsername(register.value.username);
-  if (!result1.isValid) {
-    register.value.isError = true;
-    register.value.notice = result1.notice;
-    return false;
-  }
-  const result2 = validPassword(register.value.password);
-  if (!result2.isValid) {
-    register.value.isError = true;
-    register.value.notice = result2.notice;
-    return false;
-  }
-  register.value.isError = false;
-  register.value.notice = '';
-  return true;
-};
-const validLogin = () => {
-  const result1 = validUsername(login.value.username);
-  if (!result1.isValid) {
-    login.value.isError = true;
-    login.value.notice = result1.notice;
-    return false;
-  }
-  const result2 = validPassword(login.value.password);
-  if (!result2.isValid) {
-    login.value.isError = true;
-    login.value.notice = result2.notice;
-    return false;
-  }
-  login.value.isError = false;
-  login.value.notice = '';
-  return true;
 };
 </script>
 
