@@ -29,44 +29,48 @@ const validPassword = (password: string) => {
   };
 };
 const onRegister = () => {
-  //验证用户名
-  const result1 = validUsername(register.value.username);
-  if (!result1.isValid) {
-    register.value.isError = true;
-    register.value.notice = result1.notice;
-    return;
-  }
-  //验证密码
-  const result2 = validPassword(register.value.password);
-  if (!result2.isValid) {
-    register.value.isError = true;
-    register.value.notice = result2.notice;
-    return;
-  }
-  register.value.isError = false;
-  register.value.notice = '';
+  if (!validRegister()) return;
   //TODO 提交注册信息
   console.log('start register...,username:', register.value.username, 'password:', register.value.password);
 };
 const onLogin = () => {
-  //验证用户名
+  if (!validLogin()) return;
+  //TODO 提交注册信息
+  console.log('start login...,username:', login.value.username, 'password:', login.value.password);
+};
+const validRegister = () => {
+  const result1 = validUsername(register.value.username);
+  if (!result1.isValid) {
+    register.value.isError = true;
+    register.value.notice = result1.notice;
+    return false;
+  }
+  const result2 = validPassword(register.value.password);
+  if (!result2.isValid) {
+    register.value.isError = true;
+    register.value.notice = result2.notice;
+    return false;
+  }
+  register.value.isError = false;
+  register.value.notice = '';
+  return true;
+};
+const validLogin = () => {
   const result1 = validUsername(login.value.username);
   if (!result1.isValid) {
     login.value.isError = true;
     login.value.notice = result1.notice;
-    return;
+    return false;
   }
-  //验证密码
   const result2 = validPassword(login.value.password);
   if (!result2.isValid) {
     login.value.isError = true;
     login.value.notice = result2.notice;
-    return;
+    return false;
   }
   login.value.isError = false;
   login.value.notice = '';
-  //TODO 提交注册信息
-  console.log('start login...,username:', login.value.username, 'password:', login.value.password);
+  return true;
 };
 </script>
 
@@ -78,15 +82,15 @@ const onLogin = () => {
         <div class="form">
           <h3 @click="onShowRegister">创建账户</h3>
           <div v-show="isShow" class="register">
-            <input v-model="register.username" type="text" placeholder="用户名">
-            <input v-model="register.password" type="password" placeholder="密码">
+            <input @input="validRegister" v-model="register.username" type="text" placeholder="用户名">
+            <input @input="validRegister" v-model="register.password" type="password" placeholder="密码">
             <p :class="{error:register.isError}">{{ register.notice }}</p>
             <div @click="onRegister" class="button">创建账号</div>
           </div>
           <h3 @click="onShowLogin">登录</h3>
           <div v-show="!isShow" class="login">
-            <input v-model="login.username" type="text" placeholder="用户名">
-            <input v-model="login.password" type="password" placeholder="密码">
+            <input @input="validLogin" v-model="login.username" type="text" placeholder="用户名">
+            <input @input="validLogin" v-model="login.password" type="password" placeholder="密码">
             <p :class="{error:login.isError}">{{ login.notice }}</p>
             <div @click="onLogin" class="button">登录</div>
           </div>
