@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import Avatar from './Avatar.vue';
+
 const onLogout = () => {};
 </script>
 
 <template>
   <div class="sidebar">
+    <Avatar/>
     <div class="icons">
       <router-link to="/note/1" title="笔记">
         <i class="iconfont icon-note"/>
@@ -26,8 +29,6 @@ const onLogout = () => {};
 
 .sidebar {
   position: relative;
-  top: 0;
-  left: 0;
   width: 56px;
   text-align: center;
   background-color: #2c333c;
