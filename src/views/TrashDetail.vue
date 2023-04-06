@@ -2,7 +2,8 @@
 </script>
 
 <template>
-  <div>test</div>
+  <div>TrashDetail.vue</div>
+  <h1>{{$route.params.noteId}}</h1>
 </template>
 
 <style lang="scss" scoped>

@@ -2,8 +2,8 @@
 </script>
 
 <template>
-  <router-view/>
+  <div>Login.vue</div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 </style>

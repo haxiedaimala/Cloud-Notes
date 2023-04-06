@@ -1,17 +1,32 @@
 import {createRouter, createWebHashHistory} from 'vue-router';
-import Test from '../components/test.vue';
-import HelloWorld from '../components/HelloWorld.vue';
+import Login from '../views/Login.vue';
 
+const NoteBooks = () => import('../views/NotebookList.vue');
+const Note = () => import('../views/NoteDetail.vue');
+const Trash = () => import('../views/TrashDetail.vue');
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
       path: '/',
-      component: HelloWorld
+      redirect: '/login'
     },
     {
-      path: '/test',
-      component: Test
-    }]
+      path: '/login',
+      component: Login
+    },
+    {
+      path: '/notebooks',
+      component: NoteBooks
+    },
+    {
+      path: '/note/:noteId',
+      component: Note
+    },
+    {
+      path: '/trash/:noteId',
+      component: Trash
+    }
+  ]
 });
 export default router;
