@@ -2,7 +2,7 @@ import axios from 'axios';
 
 type Options = {
   url: string,
-  methods: string,
+  method: string,
   params?: {},
   data?: {},
 }
@@ -15,7 +15,7 @@ export default function request(url: string, type = 'GET', data = {}) {
   return new Promise((resolve, reject) => {
     const option: Options = {
       url,
-      methods: type
+      method: type
     };
     if (type.toLowerCase() === 'get') {
       option.params = data;
