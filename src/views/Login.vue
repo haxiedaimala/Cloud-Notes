@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed, ref, watchPostEffect} from 'vue';
+import Auth from '../api/auth';
 
 const isLogin = ref(true);
 const userInfo = ref({
@@ -43,9 +44,21 @@ const onSubmit = () => {
   if (isLogin.value) {
     //TODO 提交登录信息
     console.log('start login...,username:', userInfo.value.username, 'password:', userInfo.value.password);
+    Auth.login({
+      username: userInfo.value.username,
+      password: userInfo.value.password
+    }).then(data => {
+      console.log(data);
+    });
   } else {
     //TODO 提交注册信息
     console.log('start register...,username:', userInfo.value.username, 'password:', userInfo.value.password);
+    Auth.register({
+      username: userInfo.value.username,
+      password: userInfo.value.password
+    }).then(data => {
+      console.log(data);
+    });
   }
 };
 </script>

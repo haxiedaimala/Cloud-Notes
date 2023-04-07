@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import Avatar from './Avatar.vue';
+import Auth from '../api/auth';
 
-const onLogout = () => {};
+const onLogout = () => {
+  Auth.logout().then(data => {
+    console.log(data);
+  });
+};
 </script>
 
 <template>
