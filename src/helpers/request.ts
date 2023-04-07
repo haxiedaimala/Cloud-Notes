@@ -6,7 +6,7 @@ type Options = {
   params?: {},
   data?: {},
 }
-axios.defaults.baseURL = 'https://note-server.hunger-valley.com/';
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 //跨域请求是否需要凭证(带上cookie)
 axios.defaults.withCredentials = true;
