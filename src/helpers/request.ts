@@ -22,14 +22,17 @@ export default function request(url: string, type = 'GET', data = {}) {
     } else {
       option.data = data;
     }
-    axios(option).then(result => {
-      if (result.status === 200) {
-        resolve(result.data);
-      } else {
-        console.error(result.data);
-        reject(result.data);
+    axios(option).then(
+      result => {
+        if (result.status === 200) {
+          resolve(result.data);
+        }
+      },
+      error => {
+        console.error(error.response.data);
+        reject(error.response.data);
       }
-    }).catch(() => {
+    ).catch(() => {
       console.error({msg: '网络异常'});
       reject({msg: '网络异常'});
     });
