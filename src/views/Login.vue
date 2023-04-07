@@ -1,19 +1,30 @@
 <script setup lang="ts">
 import {computed, ref, watchPostEffect} from 'vue';
 
-const isRegister = ref(true);
+const isLogin = ref(true);
 const userInfo = ref({
   username: '',
   password: '',
   isError: false,
-  notice: isRegister.value ? '创建账户后，请记住用户名和密码' : '输入用户名和密码'
+  notice: isLogin.value ? '输入用户名和密码' : '创建账户后，请记住用户名和密码'
 });
-const title = computed(() => isRegister.value ? '创建账户' : '登录');
+const promptInfo = computed(() => {
+  return {
+    title: isLogin.value ? '没有账号？' : '已有账号？',
+    detail: isLogin.value ? '点击注册，去注册一个属于你的账号吧' : '快快点我去进行登录吧',
+    button: isLogin.value ? '注册' : '登录'
+  };
+});
+const formInfo = computed(() => {
+  return {
+    title: isLogin.value ? '登录' : '注册',
+    buttonTitle: isLogin.value ? '登录' : '创建账户'
+  };
+});
 watchPostEffect(() => {
-  userInfo.value.notice = isRegister.value ? '创建账户后，请记住用户名和密码' : '输入用户名和密码';
+  userInfo.value.notice = isLogin.value ? '输入用户名和密码' : '创建账户后，请记住用户名和密码';
 });
-const onShowRegister = () => isRegister.value = true;
-const onShowLogin = () => isRegister.value = false;
+const onToggleLogin = () => isLogin.value = !isLogin.value;
 const validInfo = () => {
   const result1 = /^[a-zA-Z_\d\u4E00-\u9FA5]{3,15}$/.test(userInfo.value.username);
   const result2 = /^.{6,16}$/.test(userInfo.value.password);
@@ -29,12 +40,12 @@ const validInfo = () => {
 
 const onSubmit = () => {
   if (!validInfo()) return;
-  if (isRegister.value) {
-    //TODO 提交注册信息
-    console.log('start register...,username:', userInfo.value.username, 'password:', userInfo.value.password);
-  } else {
+  if (isLogin.value) {
     //TODO 提交登录信息
     console.log('start login...,username:', userInfo.value.username, 'password:', userInfo.value.password);
+  } else {
+    //TODO 提交注册信息
+    console.log('start register...,username:', userInfo.value.username, 'password:', userInfo.value.password);
   }
 };
 </script>
@@ -42,16 +53,19 @@ const onSubmit = () => {
 <template>
   <div class="login-mask">
     <div class="login-wrapper">
-      <div class="login-container">
-        <div class="main"/>
+      <div class="login-container" :class="{active:!isLogin}">
+        <div class="main">
+          <h3>{{ promptInfo.title }}</h3>
+          <p>{{ promptInfo.detail }}</p>
+          <div @click="onToggleLogin" class="button">{{ promptInfo.button }}</div>
+        </div>
         <div class="form">
-          <h3 @click="onShowRegister">创建账户</h3>
-          <h3 @click="onShowLogin">登录</h3>
-          <div class="register">
+          <h3>{{ formInfo.title }}</h3>
+          <div class="form-info">
             <input @input="validInfo" v-model="userInfo.username" type="text" placeholder="用户名">
             <input @input="validInfo" v-model="userInfo.password" type="password" placeholder="密码">
             <p :class="{error:userInfo.isError}">{{ userInfo.notice }}</p>
-            <div @click="onSubmit" class="button">{{ title }}</div>
+            <div @click="onSubmit" class="button">{{ formInfo.buttonTitle }}</div>
           </div>
         </div>
       </div>
@@ -77,40 +91,65 @@ const onSubmit = () => {
 
     .login-container {
       display: flex;
-      width: 70%;
+      width: 60%;
       height: 80%;
       margin: 0 auto;
-      background-color: #fff;
+      background-color: #36bc64;
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
       font-family: Helvetica, Arial, sans-serif;
 
       .main {
-        flex: 2;
-        background: #36bc64 url(//cloud.hunger-valley.com/17-12-13/38476998.jpg-middle) center center no-repeat;
-        background-size: contain;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        transition: all 250ms ease-in-out;
+
+        h3 {
+          font-weight: normal;
+          margin-bottom: 1em;
+        }
+
+        p {
+          font-size: 12px;
+          padding: 1.2em;
+          font-weight: 300;
+          margin-bottom: 0.8em;
+        }
+
+        .button {
+          border: 1px solid #fff;
+          border-radius: 4px;
+          cursor: pointer;
+          padding: 0.3em 1.5em;
+
+          &:hover {
+            background-color: #fff;
+            color: #36bc64;
+          }
+        }
       }
 
       .form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         flex: 1;
-        border-left: 1px solid #ccc;
+        transition: all 250ms ease-in-out;
+        background-color: #fff;
 
         h3 {
           padding: 0.6em 1.2em;
           font-weight: normal;
-          font-size: 16px;
-          cursor: pointer;
-          border-top: 1px solid #eee;
-
-          &:nth-of-type(2) {
-            border-bottom: 1px solid #eee;
-          }
+          text-align: center;
+          letter-spacing: 1em;
         }
 
-        .login,
-        .register {
+        .form-info {
           padding: 0.6em 1.2em;
-          border-top: 1px solid #eee;
 
           input {
             display: block;
@@ -118,13 +157,15 @@ const onSubmit = () => {
             line-height: 2.5em;
             padding: 0 0.6em;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid transparent;
+            border-bottom-color: #ccc;
             outline: none;
             font-size: 14px;
             margin-top: 0.8em;
 
             &:focus {
-              border: 1px solid #9dcaf8;
+              border-bottom-color: #9dcaf8;
+              transform: scale(1.01, 1.01);
             }
           }
 
@@ -146,11 +187,21 @@ const onSubmit = () => {
             border-radius: 4px;
             margin-top: 16px;
             cursor: pointer;
+
+            &:hover {
+              background-color: lighten(#2bb964, 10%);
+            }
           }
         }
+      }
 
-        .login {
-          border-top: none;
+      &.active {
+        .main {
+          transform: translate(100%, 0);
+        }
+
+        .form {
+          transform: translate(-100%, 0);
         }
       }
     }
