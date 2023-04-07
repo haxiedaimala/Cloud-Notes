@@ -1,44 +1,41 @@
 <script setup lang="ts">
-import {Ref, ref} from 'vue';
+import {computed, ref, watchPostEffect} from 'vue';
 
-const isShow = ref(true);
-const register = ref({
+const isRegister = ref(true);
+const userInfo = ref({
   username: '',
   password: '',
   isError: false,
-  notice: '输入用户名和密码'
+  notice: isRegister.value ? '创建账户后，请记住用户名和密码' : '输入用户名和密码'
 });
-const login = ref({
-  username: '',
-  password: '',
-  isError: false,
-  notice: '创建账户后，请记住用户名和密码'
+const title = computed(() => isRegister.value ? '创建账户' : '登录');
+watchPostEffect(() => {
+  userInfo.value.notice = isRegister.value ? '创建账户后，请记住用户名和密码' : '输入用户名和密码';
 });
-const onShowRegister = () => isShow.value = true;
-const onShowLogin = () => isShow.value = false;
-const validInfo = (data: Ref<{ username: string, password: string, isError: boolean, notice: string }>) => {
-  const result1 = /^[a-zA-Z_\d\u4E00-\u9FA5]{3,15}$/.test(data.value.username);
-  const result2 = /^.{6,16}$/.test(data.value.password);
+const onShowRegister = () => isRegister.value = true;
+const onShowLogin = () => isRegister.value = false;
+const validInfo = () => {
+  const result1 = /^[a-zA-Z_\d\u4E00-\u9FA5]{3,15}$/.test(userInfo.value.username);
+  const result2 = /^.{6,16}$/.test(userInfo.value.password);
   if (!result1 || !result2) {
-    data.value.isError = true;
-    data.value.notice = result1 ? '密码长度为6~16个字符' : '用户名必须是3~15个字符，限数字字母下划线中文';
+    userInfo.value.isError = true;
+    userInfo.value.notice = result1 ? '密码长度为6~16个字符' : '用户名必须是3~15个字符，限数字字母下划线中文';
     return false;
   }
-  data.value.isError = false;
-  data.value.notice = '';
+  userInfo.value.isError = false;
+  userInfo.value.notice = '';
   return true;
 };
-const validRegister = () => validInfo(register);
-const validLogin = () => validInfo(login);
-const onRegister = () => {
-  if (!validRegister()) return;
-  //TODO 提交注册信息
-  console.log('start register...,username:', register.value.username, 'password:', register.value.password);
-};
-const onLogin = () => {
-  if (!validLogin()) return;
-  //TODO 提交注册信息
-  console.log('start login...,username:', login.value.username, 'password:', login.value.password);
+
+const onSubmit = () => {
+  if (!validInfo()) return;
+  if (isRegister.value) {
+    //TODO 提交注册信息
+    console.log('start register...,username:', userInfo.value.username, 'password:', userInfo.value.password);
+  } else {
+    //TODO 提交登录信息
+    console.log('start login...,username:', userInfo.value.username, 'password:', userInfo.value.password);
+  }
 };
 </script>
 
@@ -49,18 +46,12 @@ const onLogin = () => {
         <div class="main"/>
         <div class="form">
           <h3 @click="onShowRegister">创建账户</h3>
-          <div v-show="isShow" class="register">
-            <input @input="validRegister" v-model="register.username" type="text" placeholder="用户名">
-            <input @input="validRegister" v-model="register.password" type="password" placeholder="密码">
-            <p :class="{error:register.isError}">{{ register.notice }}</p>
-            <div @click="onRegister" class="button">创建账号</div>
-          </div>
           <h3 @click="onShowLogin">登录</h3>
-          <div v-show="!isShow" class="login">
-            <input @input="validLogin" v-model="login.username" type="text" placeholder="用户名">
-            <input @input="validLogin" v-model="login.password" type="password" placeholder="密码">
-            <p :class="{error:login.isError}">{{ login.notice }}</p>
-            <div @click="onLogin" class="button">登录</div>
+          <div class="register">
+            <input @input="validInfo" v-model="userInfo.username" type="text" placeholder="用户名">
+            <input @input="validInfo" v-model="userInfo.password" type="password" placeholder="密码">
+            <p :class="{error:userInfo.isError}">{{ userInfo.notice }}</p>
+            <div @click="onSubmit" class="button">{{ title }}</div>
           </div>
         </div>
       </div>
