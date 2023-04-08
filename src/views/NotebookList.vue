@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
 import Notebooks from '../api/notebooks';
+import friendlyDate from '../helpers/friendlyDate';
 import {ref} from 'vue';
 
 validLogin();
@@ -14,7 +15,11 @@ const onCreate = () => {
   Notebooks.addNotebook({title})
       .then(data => {
         const result = data as CreateNotebook;
-        notebooks.value.unshift({...result.data!, noteCounts: 0});
+        notebooks.value.unshift({
+          ...result.data!,
+          noteCounts: 0,
+          friendlyCreatedAt: friendlyDate(result.data!.createdAt)
+        });
         alert(result.msg);
       })
       .catch(error => {
@@ -63,7 +68,7 @@ const onDelete = (notebook: NotebookItem) => {
           <i class="iconfont icon-note"/>
           <span class="notebook-title">{{ notebook.title }}</span>
           <span>{{ notebook.noteCounts }}篇</span>
-          <span class="date">5天前</span>
+          <span class="date">{{ notebook.friendlyCreatedAt }}</span>
           <span class="action" @click.prevent="onEdit(notebook)">编辑</span>
           <span class="action" @click.prevent="onDelete(notebook)">删除</span>
         </router-link>

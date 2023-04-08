@@ -15,7 +15,8 @@ interface NotebookItem {
   'userId': number,
   'createdAt': string,
   'updatedAt': string,
-  'noteCounts': number
+  'noteCounts': number,
+  'friendlyCreatedAt': string,
 }
 
 interface NotebookList {

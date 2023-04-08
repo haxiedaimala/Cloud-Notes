@@ -1,4 +1,5 @@
 import request from '../helpers/request';
+import friendlyDate from '../helpers/friendlyDate';
 
 const URL = {
   GET: '/notebooks',
@@ -8,7 +9,20 @@ const URL = {
 };
 export default {
   getAll() {
-    return request(URL.GET, 'GET');
+    return new Promise((resolve, reject) => {
+      request(URL.GET, 'GET')
+        .then(data => {
+          const result = data as NotebookList;
+          result.data = result.data.sort((a: NotebookItem, b: NotebookItem) => a.createdAt < b.createdAt ? 1 : -1);
+          result.data.forEach(item => {
+            item.friendlyCreatedAt = friendlyDate(item.createdAt);
+          });
+          resolve(result);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
   },
   addNotebook({title = ''} = {title: ''}) {
     return request(URL.ADD, 'POST', {title});
