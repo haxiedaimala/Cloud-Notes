@@ -1,28 +1,72 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
+import Notebooks from '../api/notebooks';
+import {ref} from 'vue';
 
 validLogin();
+let notebooks = ref<NotebookItem[]>([]);
+Notebooks.getAll().then(result => {
+  notebooks.value = (result as NotebookList).data;
+});
+const onCreate = () => {
+  const title = window.prompt('请输入笔记本标题：');
+  if (title == null) return;
+  Notebooks.addNotebook({title})
+      .then(data => {
+        const result = data as CreateNotebook;
+        notebooks.value.unshift({...result.data!, noteCounts: 0});
+        alert(result.msg);
+      })
+      .catch(error => {
+        alert(error.msg);
+      });
+};
+const onEdit = (notebook: NotebookItem) => {
+  const title = window.prompt('修改标题：', notebook.title);
+  if (title == null) return;
+  Notebooks.updateNotebook(notebook.id, {title}).then(data => {
+    notebook.title = title;
+    alert((data as UpdateNotebook).msg);
+  }).catch(error => {
+    alert(error.msg);
+  });
+};
+const onDelete = (notebook: NotebookItem) => {
+  const isConfirm = window.confirm('你确定要删除吗？');
+  if (!isConfirm) return;
+  Notebooks.deleteNotebook(notebook.id)
+      .then(data => {
+        notebooks.value.splice(notebooks.value.indexOf(notebook), 1);
+        alert((data as DeleteNotebook).msg);
+      })
+      .catch(error => {
+        alert(error.msg);
+      });
+};
 </script>
 
 <template>
   <div class="notebooks-wrapper">
     <header>
-      <a href="#">
+      <div @click="onCreate" class="create">
         <i class="iconfont icon-note"/>
         <span>新建笔记本</span>
-      </a>
+      </div>
     </header>
     <main>
-      <h3>笔记本列表（10）</h3>
+      <h3>笔记本列表（{{ notebooks.length }}）</h3>
       <div class="notebook-list">
-        <div class="notebook-item">
+        <router-link :to="`/note/${notebook.id}`"
+                     v-for="notebook in notebooks"
+                     :key="notebook.id"
+                     class="notebook-item">
           <i class="iconfont icon-note"/>
-          <span class="notebook-title">笔记本标题1</span>
-          <span>10</span>
+          <span class="notebook-title">{{ notebook.title }}</span>
+          <span>{{ notebook.noteCounts }}篇</span>
           <span class="date">5天前</span>
-          <span class="action">编辑</span>
-          <span class="action">删除</span>
-        </div>
+          <span class="action" @click.prevent="onEdit(notebook)">编辑</span>
+          <span class="action" @click.prevent="onDelete(notebook)">删除</span>
+        </router-link>
       </div>
     </main>
   </div>
@@ -40,7 +84,7 @@ validLogin();
     line-height: 3em;
     border-bottom: 1px solid #ccc;
 
-    a {
+    .create {
       display: flex;
       align-items: center;
       font-size: 14px;
@@ -96,7 +140,7 @@ validLogin();
         }
 
         .date {
-          margin-left: 0.6em;
+          margin-left: 1em;
         }
 
         .action {
