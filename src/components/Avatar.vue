@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
+import Auth from '../api/auth';
 
-const username = ref('hunger');
-const slug = ref('P');
+const username = ref('未登录');
+const slug = computed(() => username.value.charAt(0));
+Auth.getInfo().then(data => {
+  let result = data as UserInfo;
+  if (result.isLogin) {
+    username.value = result.data!.username;
+  }
+});
 </script>
 
 <template>
