@@ -44,33 +44,19 @@ const validInfo = () => {
 
 const onSubmit = () => {
   if (!validInfo()) return;
-  if (isLogin.value) {
-    Auth.login({
-      username: userInfo.value.username,
-      password: userInfo.value.password
-    }).then(() => {
-      userInfo.value.isError = false;
-      userInfo.value.notice = '';
-      userNameInfo.value.username = userInfo.value.username;
-      router.push({path: '/notebooks'});
-    }).catch(error => {
-      userInfo.value.isError = true;
-      userInfo.value.notice = error.msg;
-    });
-  } else {
-    Auth.register({
-      username: userInfo.value.username,
-      password: userInfo.value.password
-    }).then(() => {
-      userInfo.value.isError = false;
-      userInfo.value.notice = '';
-      userNameInfo.value.username = userInfo.value.username;
-      router.push({path: '/notebooks'});
-    }).catch(error => {
-      userInfo.value.isError = true;
-      userInfo.value.notice = error.msg;
-    });
-  }
+  const type = isLogin.value ? 'login' : 'register';
+  Auth[type]({
+    username: userInfo.value.username,
+    password: userInfo.value.password
+  }).then(() => {
+    userInfo.value.isError = false;
+    userInfo.value.notice = '';
+    userNameInfo.value.username = userInfo.value.username;
+    router.push({path: '/notebooks'});
+  }).catch(error => {
+    userInfo.value.isError = true;
+    userInfo.value.notice = error.msg;
+  });
 };
 </script>
 
