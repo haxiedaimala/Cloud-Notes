@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {computed, ref, watchPostEffect} from 'vue';
+import {computed, inject, Ref, ref, watchPostEffect} from 'vue';
 import Auth from '../api/auth';
 import {useRouter} from 'vue-router';
 
+const userNameInfo = inject<Ref<{ username: string }>>('userInfo')!;
 const router = useRouter();
 const isLogin = ref(true);
 const userInfo = ref({
@@ -50,6 +51,7 @@ const onSubmit = () => {
     }).then(() => {
       userInfo.value.isError = false;
       userInfo.value.notice = '';
+      userNameInfo.value.username = userInfo.value.username;
       router.push({path: '/notebooks'});
     }).catch(error => {
       userInfo.value.isError = true;
@@ -62,6 +64,7 @@ const onSubmit = () => {
     }).then(() => {
       userInfo.value.isError = false;
       userInfo.value.notice = '';
+      userNameInfo.value.username = userInfo.value.username;
       router.push({path: '/notebooks'});
     }).catch(error => {
       userInfo.value.isError = true;

@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue';
-import Auth from '../api/auth';
+import {computed, inject, Ref} from 'vue';
 
-const username = ref('未登录');
+const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
+const username = computed(() => userInfo.value.username);
 const slug = computed(() => username.value.charAt(0));
-Auth.getInfo().then(data => {
-  let result = data as UserInfo;
-  if (result.isLogin) {
-    username.value = result.data!.username;
-  }
-});
 </script>
 
 <template>
