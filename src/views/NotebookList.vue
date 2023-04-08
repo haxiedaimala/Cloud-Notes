@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import Auth from '../api/auth';
+import {inject, Ref} from 'vue';
 import {useRouter} from 'vue-router';
 
 const router = useRouter();
-Auth.getInfo().then(data => {
-  let result = data as UserInfo;
-  if (!result.isLogin) {
-    router.push({path: '/login'});
-  }
-});
+const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
+if (userInfo.value.username === '未登录') {
+  router.push({path: '/login'});
+}
 </script>
 
 <template>
