@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import {inject, Ref} from 'vue';
-import {useRouter} from 'vue-router';
+import {validLogin} from '../helpers/validLogin';
 
-const router = useRouter();
-const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
-if (userInfo.value.username === '未登录') {
-  router.push({path: '/login'});
-}
+validLogin();
 </script>
 
 <template>
