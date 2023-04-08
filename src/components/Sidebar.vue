@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Avatar from './Avatar.vue';
 import Auth from '../api/auth';
+import {useRouter} from 'vue-router';
 
+const router = useRouter();
 const onLogout = () => {
-  Auth.logout().then(data => {
-    console.log(data);
-  });
+  Auth.logout().then(
+      () => router.push({path: '/login'})
+  );
 };
 </script>
 

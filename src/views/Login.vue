@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {computed, ref, watchPostEffect} from 'vue';
 import Auth from '../api/auth';
+import {useRouter} from 'vue-router';
 
+const router = useRouter();
 const isLogin = ref(true);
 const userInfo = ref({
   username: '',
@@ -42,22 +44,28 @@ const validInfo = () => {
 const onSubmit = () => {
   if (!validInfo()) return;
   if (isLogin.value) {
-    //TODO 提交登录信息
-    console.log('start login...,username:', userInfo.value.username, 'password:', userInfo.value.password);
     Auth.login({
       username: userInfo.value.username,
       password: userInfo.value.password
-    }).then(data => {
-      console.log(data);
+    }).then(() => {
+      userInfo.value.isError = false;
+      userInfo.value.notice = '';
+      router.push({path: '/notebooks'});
+    }).catch(error => {
+      userInfo.value.isError = true;
+      userInfo.value.notice = error.msg;
     });
   } else {
-    //TODO 提交注册信息
-    console.log('start register...,username:', userInfo.value.username, 'password:', userInfo.value.password);
     Auth.register({
       username: userInfo.value.username,
       password: userInfo.value.password
-    }).then(data => {
-      console.log(data);
+    }).then(() => {
+      userInfo.value.isError = false;
+      userInfo.value.notice = '';
+      router.push({path: '/notebooks'});
+    }).catch(error => {
+      userInfo.value.isError = true;
+      userInfo.value.notice = error.msg;
     });
   }
 };
