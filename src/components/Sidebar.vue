@@ -2,12 +2,15 @@
 import Avatar from './Avatar.vue';
 import Auth from '../api/auth';
 import {useRouter} from 'vue-router';
+import {inject, Ref} from 'vue';
 
 const router = useRouter();
+const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
 const onLogout = () => {
-  Auth.logout().then(
-      () => router.push({path: '/login'})
-  );
+  Auth.logout().then(() => {
+    userInfo.value.username = '未登录';
+    router.push({path: '/login'});
+  });
 };
 </script>
 
