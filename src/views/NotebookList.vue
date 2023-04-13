@@ -27,18 +27,9 @@ const onCreate = () => {
           noteCounts: 0,
           friendlyCreatedAt: friendlyDate(result.data!.createdAt)
         });
-        ElMessage({
-          type: 'success',
-          message: result.msg,
-        });
+        ElMessage.success(result.msg);
       })
-      .catch(error => {
-        if (error === 'cancel') return;
-        ElMessage({
-          type: 'error',
-          message: error.msg,
-        });
-      });
+      .catch(error => { if (error === 'cancel') return; });
 };
 const onEdit = (notebook: NotebookItem) => {
   let title = '';
@@ -55,46 +46,24 @@ const onEdit = (notebook: NotebookItem) => {
       })
       .then(data => {
         notebook.title = title;
-        ElMessage({
-          type: 'success',
-          message: (data as UpdateNotebook).msg,
-        });
+        ElMessage.success((data as UpdateNotebook).msg);
       })
-      .catch(error => {
-        if (error === 'cancel') return;
-        ElMessage({
-          type: 'error',
-          message: error.msg,
-        });
-      });
+      .catch(error => {if (error === 'cancel') return;});
 };
 const onDelete = (notebook: NotebookItem) => {
-  ElMessageBox.confirm(
-      '你确定要删除吗？',
-      '删除笔记本',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-  )
+  ElMessageBox.confirm('你确定要删除吗？', '删除笔记本', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
       .then(() => {
         return Notebooks.deleteNotebook(notebook.id);
       })
       .then(data => {
         notebooks.value.splice(notebooks.value.indexOf(notebook), 1);
-        ElMessage({
-          type: 'success',
-          message: (data as DeleteNotebook).msg,
-        });
+        ElMessage.success((data as DeleteNotebook).msg);
       })
-      .catch(error => {
-        if (error === 'cancel') return;
-        ElMessage({
-          type: 'error',
-          message: error.msg,
-        });
-      });
+      .catch(error => {if (error === 'cancel') return;});
 };
 </script>
 

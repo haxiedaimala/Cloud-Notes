@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {ElMessage} from 'element-plus';
 
 type Options = {
   url: string,
@@ -29,11 +30,11 @@ export default function request(url: string, type = 'GET', data = {}) {
       if (result.status === 200) {
         resolve(result.data);
       } else {
-        console.error(result.data);
+        ElMessage.error(result.data.msg);
         reject(result.data);
       }
     }).catch(() => {
-      console.error({msg: '网络异常'});
+      ElMessage.error('网络异常');
       reject({msg: '网络异常'});
     });
   });
