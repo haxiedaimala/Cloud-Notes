@@ -18,13 +18,13 @@ const onLogout = () => {
   <div class="sidebar">
     <Avatar/>
     <div class="icons">
-      <router-link to="/note/1" title="笔记">
+      <router-link to="/note" title="笔记">
         <i class="iconfont icon-note"/>
       </router-link>
       <router-link to="/notebooks" title="笔记本">
         <i class="iconfont icon-notebook"/>
       </router-link>
-      <router-link to="/trash/2" title="回收站">
+      <router-link to="/trash" title="回收站">
         <i class="iconfont icon-trash"/>
       </router-link>
     </div>

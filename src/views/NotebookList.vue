@@ -78,7 +78,7 @@ const onDelete = (notebook: NotebookItem) => {
     <main>
       <h3>笔记本列表（{{ notebooks.length }}）</h3>
       <div class="notebook-list">
-        <router-link :to="`/note/${notebook.id}`"
+        <router-link :to="`/note?notebookId=${notebook.id}`"
                      v-for="notebook in notebooks"
                      :key="notebook.id"
                      class="notebook-item">

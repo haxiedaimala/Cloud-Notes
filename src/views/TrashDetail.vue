@@ -6,7 +6,7 @@ validLogin();
 
 <template>
   <div>TrashDetail.vue</div>
-  <h1>{{ $route.params.noteId }}</h1>
+  <h1>{{ $route.query.noteId }}</h1>
 </template>
 
 <style lang="scss" scoped>
