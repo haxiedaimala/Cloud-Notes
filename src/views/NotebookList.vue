@@ -3,6 +3,7 @@ import {validLogin} from '../helpers/validLogin';
 import Notebooks from '../api/notebooks';
 import friendlyDate from '../helpers/friendlyDate';
 import {ref} from 'vue';
+import {ElMessage, ElMessageBox} from 'element-plus';
 
 validLogin();
 let notebooks = ref<NotebookItem[]>([]);
@@ -10,9 +11,15 @@ Notebooks.getAll().then(result => {
   notebooks.value = (result as NotebookList).data;
 });
 const onCreate = () => {
-  const title = window.prompt('请输入笔记本标题：');
-  if (title == null) return;
-  Notebooks.addNotebook({title})
+  ElMessageBox.prompt('请输入笔记本标题', '创建笔记本', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /^.{1,30}$/,
+    inputErrorMessage: '标题不为空，且不超过30个字符',
+  })
+      .then(({value}) => {
+        return Notebooks.addNotebook({title: value});
+      })
       .then(data => {
         const result = data as CreateNotebook;
         notebooks.value.unshift({
@@ -20,32 +27,73 @@ const onCreate = () => {
           noteCounts: 0,
           friendlyCreatedAt: friendlyDate(result.data!.createdAt)
         });
-        alert(result.msg);
+        ElMessage({
+          type: 'success',
+          message: result.msg,
+        });
       })
       .catch(error => {
-        alert(error.msg);
+        if (error === 'cancel') return;
+        ElMessage({
+          type: 'error',
+          message: error.msg,
+        });
       });
 };
 const onEdit = (notebook: NotebookItem) => {
-  const title = window.prompt('修改标题：', notebook.title);
-  if (title == null) return;
-  Notebooks.updateNotebook(notebook.id, {title}).then(data => {
-    notebook.title = title;
-    alert((data as UpdateNotebook).msg);
-  }).catch(error => {
-    alert(error.msg);
-  });
-};
-const onDelete = (notebook: NotebookItem) => {
-  const isConfirm = window.confirm('你确定要删除吗？');
-  if (!isConfirm) return;
-  Notebooks.deleteNotebook(notebook.id)
+  let title = '';
+  ElMessageBox.prompt('请输入新笔记本标题', '修改笔记本', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /^.{1,30}$/,
+    inputErrorMessage: '标题不为空，且不超过30个字符',
+    inputValue: notebook.title
+  })
+      .then(({value}) => {
+        title = value;
+        return Notebooks.updateNotebook(notebook.id, {title});
+      })
       .then(data => {
-        notebooks.value.splice(notebooks.value.indexOf(notebook), 1);
-        alert((data as DeleteNotebook).msg);
+        notebook.title = title;
+        ElMessage({
+          type: 'success',
+          message: (data as UpdateNotebook).msg,
+        });
       })
       .catch(error => {
-        alert(error.msg);
+        if (error === 'cancel') return;
+        ElMessage({
+          type: 'error',
+          message: error.msg,
+        });
+      });
+};
+const onDelete = (notebook: NotebookItem) => {
+  ElMessageBox.confirm(
+      '你确定要删除吗？',
+      '删除笔记本',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+  )
+      .then(() => {
+        return Notebooks.deleteNotebook(notebook.id);
+      })
+      .then(data => {
+        notebooks.value.splice(notebooks.value.indexOf(notebook), 1);
+        ElMessage({
+          type: 'success',
+          message: (data as DeleteNotebook).msg,
+        });
+      })
+      .catch(error => {
+        if (error === 'cancel') return;
+        ElMessage({
+          type: 'error',
+          message: error.msg,
+        });
       });
 };
 </script>
