@@ -41,3 +41,25 @@ interface DeleteNotebook {
 interface UpdateNotebook {
   msg: string;
 }
+
+interface NoteItem {
+  'id': number,
+  'title': string,
+  'content': string,
+  'notebookId': number,
+  'userId': number,
+  'isDelete': false,
+  'createdAt': string,
+  'updatedAt': string
+  'friendlyUpdatedAt': string,
+  'friendlyCreateAt': string
+}
+
+interface NoteList {
+  data: NoteItem[];
+}
+
+interface CreateNote {
+  msg: string,
+  data?: NoteItem[]
+}

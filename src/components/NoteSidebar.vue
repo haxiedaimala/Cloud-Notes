@@ -1,29 +1,45 @@
 <script setup lang="ts">
 import {ArrowDown} from '@element-plus/icons-vue';
-import {ref} from 'vue';
+import {onBeforeMount, ref} from 'vue';
+import Notebooks from '../api/notebooks';
+import Notes from '../api/notes';
+import {useRoute, useRouter} from 'vue-router';
 
+const notebooks = ref<NotebookItem[]>([]);
+const notes = ref<NoteItem[]>([]);
+const currentBook = ref<NotebookItem>();
+const route = useRoute();
+const router = useRouter();
+onBeforeMount(() => {
+  Notebooks.getAll()
+      .then(result => {
+        const data = (result as NotebookList).data;
+        notebooks.value = data;
+        if (data.length === 0) return;
+        //获取最新创建的笔记本信息--直接访问笔记页面（无notebookId），点击笔记本列表进入（有notebookId）、以上都不存在｛｝
+        currentBook.value = data.find(notebook => notebook.id.toString() === route.query.notebookId) || data[0];
+        return Notes.getAll({notebookId: currentBook.value!.id});
+      })
+      .then(result => {
+        notes.value = (result as NoteList).data;
+      });
+});
 const handleCommand = (command: string | number | object) => {
-  console.log(command);
+  if (command === 'trash') return router.push({path: '/trash'});
+  currentBook.value = notebooks.value.find(notebook => notebook.id === (command as number));
+  Notes.getAll({notebookId: command as number}).then(data => {
+    notes.value = (data as NoteList).data;
+  });
 };
-const notebooks = ref([
-  {id: 1, title: 'title-01'},
-  {id: 2, title: 'title-02'},
-  {id: 3, title: 'title-03'},
-]);
-const notes = ref([
-  {id: 11, title: '第一个笔记', updateAtFriendly: '刚刚'},
-  {id: 12, title: '第二个笔记', updateAtFriendly: '1小时前'},
-  {id: 13, title: '第三个笔记', updateAtFriendly: '2月前'},
-]);
 </script>
 
 <template>
   <div class="note-sidebar">
     <div class="note-head">
       <span class="note-add">添加笔记</span>
-      <el-dropdown class="notebook-title" @command="handleCommand">
+      <el-dropdown class="notebook-title" @command="handleCommand" max-height="80vh">
         <span class="el-dropdown-link">
-          我的笔记本1<el-icon class="el-icon--right"><arrow-down/></el-icon>
+         {{ currentBook && currentBook.title }}<el-icon class="el-icon--right"><arrow-down/></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -43,8 +59,8 @@ const notes = ref([
     </div>
     <ul class="notes">
       <li v-for="note in notes" :key="note.id">
-        <router-link :to="`/note?noteId=${note.id}`">
-          <span class="note-date">{{ note.updateAtFriendly }}</span>
+        <router-link :to="`/note?noteId=${note.id}&&notebookId=${currentBook&&currentBook.id}`">
+          <span class="note-date">{{ note.friendlyUpdatedAt }}</span>
           <span class="note-title">{{ note.title }}</span>
         </router-link>
       </li>
@@ -69,7 +85,7 @@ const notes = ref([
     .note-add {
       position: absolute;
       top: 50%;
-      right: 0;
+      right: 0.4em;
       z-index: 10;
       transform: translate(0, -50%);
       color: #666;
