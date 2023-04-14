@@ -4,16 +4,23 @@ import NoteSidebar from '../components/NoteSidebar.vue';
 import {ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute} from 'vue-router';
 
+type CurrentNote = {
+  title: '',
+  content: '',
+  friendlyCreateAt?: string,
+  friendlyUpdatedAt?: string,
+  statusText?: string,
+}
 validLogin();
-const currentNote = ref<NoteItem>();
+const currentNote = ref<NoteItem | CurrentNote>({title: '', content: ''});
 const notes = ref<NoteItem[]>([]);
 const route = useRoute();
 const onUpdateNotes = (value: NoteItem[]) => {
   notes.value = value;
-  currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId);
+  currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId) || {title: '', content: ''};
 };
 onBeforeRouteUpdate(to => {
-  currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId);
+  currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId) || {title: '', content: ''};
 });
 </script>
 
@@ -21,22 +28,22 @@ onBeforeRouteUpdate(to => {
   <div class="layout">
     <NoteSidebar @update:notes="onUpdateNotes"/>
     <div class="note-detail">
-      <template v-if="!currentNote">
+      <template v-if="!currentNote.id">
         <div class="note-empty">请选择笔记</div>
       </template>
       <template v-else>
         <div class="note-bar">
-          <span>创建日期：{{ currentNote && currentNote.friendlyCreateAt }}</span>
-          <span>更新日期：{{ currentNote && currentNote.friendlyUpdatedAt }}</span>
-          <span>{{ currentNote && currentNote.statusText }}</span>
+          <span>创建日期：{{ currentNote.friendlyCreateAt }}</span>
+          <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
+          <span>{{ currentNote.statusText }}</span>
           <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
           <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
         </div>
         <div class="note-title">
-          <input type="text" :value="currentNote && currentNote.title" placeholder="输入标题"/>
+          <input type="text" v-model="currentNote.title" placeholder="输入标题"/>
         </div>
         <div class="note-editor">
-          <textarea v-show="true" :value="currentNote && currentNote.content" placeholder="输入内容，支持 markdown 语法"/>
+          <textarea v-show="true" v-model="currentNote.content" placeholder="输入内容，支持 markdown 语法"/>
           <div class="note-preview markdown-body" v-show="false"/>
         </div>
       </template>
