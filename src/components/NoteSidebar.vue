@@ -10,18 +10,22 @@ const notes = ref<NoteItem[]>([]);
 const currentBook = ref<NotebookItem>();
 const route = useRoute();
 const router = useRouter();
+const emits = defineEmits<{
+  (e: 'update:notes', value: NoteItem[]): void
+}>();
 onBeforeMount(() => {
   Notebooks.getAll()
       .then(result => {
         const data = (result as NotebookList).data;
         notebooks.value = data;
         if (data.length === 0) return;
-        //获取最新创建的笔记本信息--直接访问笔记页面（无notebookId），点击笔记本列表进入（有notebookId）、以上都不存在｛｝
+        //获取最新创建的笔记本信息--直接访问笔记页面（无notebookId），点击笔记本列表进入（有notebookId）
         currentBook.value = data.find(notebook => notebook.id.toString() === route.query.notebookId) || data[0];
         return Notes.getAll({notebookId: currentBook.value!.id});
       })
       .then(result => {
         notes.value = (result as NoteList).data;
+        emits('update:notes', notes.value);
       });
 });
 const handleCommand = (command: string | number | object) => {

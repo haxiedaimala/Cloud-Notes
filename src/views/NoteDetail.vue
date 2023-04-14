@@ -1,27 +1,36 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
+import {ref} from 'vue';
+import {onBeforeRouteUpdate} from 'vue-router';
 
 validLogin();
+const currentNote = ref<NoteItem>();
+const notes = ref<NoteItem[]>([]);
+const onUpdateNotes = (value: NoteItem[]) => notes.value = value;
+onBeforeRouteUpdate(to => {
+  currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId);
+});
 </script>
 
 <template>
   <div class="layout">
-    <NoteSidebar/>
+    <NoteSidebar @update:notes="onUpdateNotes"/>
     <div class="note-detail">
       <div class="note-bar">
-        <span>创建日期：2天前</span>
-        <span>更新日期：1天前</span>
-        <span>未更新</span>
+        <span>创建日期：{{ currentNote && currentNote.friendlyCreateAt }}</span>
+        <span>更新日期：{{ currentNote && currentNote.friendlyUpdatedAt }}</span>
+        <span>{{ currentNote && currentNote.statusText }}</span>
         <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
         <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
       </div>
       <div class="note-title">
-        <input type="text" placeholder="输入标题"/>
+        <input type="text" :value="currentNote && currentNote.title" placeholder="输入标题"/>
       </div>
       <div class="note-editor">
-        <textarea v-show="true" placeholder="输入内容，支持 markdown 语法"></textarea>
-        <div class="note-preview markdown-body" v-show="false" v-html="xx"></div>
+        <textarea v-show="true" :value="currentNote && currentNote.content"
+                  placeholder="输入内容，支持 markdown 语法"></textarea>
+        <div class="note-preview markdown-body" v-show="false"></div>
       </div>
     </div>
   </div>
