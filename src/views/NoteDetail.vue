@@ -2,12 +2,16 @@
 import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
 import {ref} from 'vue';
-import {onBeforeRouteUpdate} from 'vue-router';
+import {onBeforeRouteUpdate, useRoute} from 'vue-router';
 
 validLogin();
 const currentNote = ref<NoteItem>();
 const notes = ref<NoteItem[]>([]);
-const onUpdateNotes = (value: NoteItem[]) => notes.value = value;
+const route = useRoute();
+const onUpdateNotes = (value: NoteItem[]) => {
+  notes.value = value;
+  currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId);
+};
 onBeforeRouteUpdate(to => {
   currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId);
 });
@@ -17,21 +21,25 @@ onBeforeRouteUpdate(to => {
   <div class="layout">
     <NoteSidebar @update:notes="onUpdateNotes"/>
     <div class="note-detail">
-      <div class="note-bar">
-        <span>创建日期：{{ currentNote && currentNote.friendlyCreateAt }}</span>
-        <span>更新日期：{{ currentNote && currentNote.friendlyUpdatedAt }}</span>
-        <span>{{ currentNote && currentNote.statusText }}</span>
-        <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
-        <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
-      </div>
-      <div class="note-title">
-        <input type="text" :value="currentNote && currentNote.title" placeholder="输入标题"/>
-      </div>
-      <div class="note-editor">
-        <textarea v-show="true" :value="currentNote && currentNote.content"
-                  placeholder="输入内容，支持 markdown 语法"></textarea>
-        <div class="note-preview markdown-body" v-show="false"></div>
-      </div>
+      <template v-if="!currentNote">
+        <div class="note-empty">请选择笔记</div>
+      </template>
+      <template v-else>
+        <div class="note-bar">
+          <span>创建日期：{{ currentNote && currentNote.friendlyCreateAt }}</span>
+          <span>更新日期：{{ currentNote && currentNote.friendlyUpdatedAt }}</span>
+          <span>{{ currentNote && currentNote.statusText }}</span>
+          <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
+          <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
+        </div>
+        <div class="note-title">
+          <input type="text" :value="currentNote && currentNote.title" placeholder="输入标题"/>
+        </div>
+        <div class="note-editor">
+          <textarea v-show="true" :value="currentNote && currentNote.content" placeholder="输入内容，支持 markdown 语法"/>
+          <div class="note-preview markdown-body" v-show="false"/>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -42,10 +50,20 @@ onBeforeRouteUpdate(to => {
   display: flex;
 
   .note-detail {
+    position: relative;
     display: flex;
     flex-direction: column;
     flex: 1;
     background-color: #fff;
+
+    .note-empty {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40px;
+      color: #ccc;
+    }
 
     .note-bar {
       padding: 0.4em 1.2em;
