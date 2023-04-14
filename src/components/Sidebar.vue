@@ -35,8 +35,6 @@ const onLogout = () => {
 </template>
 
 <style lang="scss" scoped>
-@import "//at.alicdn.com/t/c/font_4000061_oayo5fc4che.css";
-
 .sidebar {
   position: relative;
   width: 56px;
