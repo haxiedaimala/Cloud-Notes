@@ -3,25 +3,46 @@ import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
 import {ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute} from 'vue-router';
+import Notes from '../api/notes';
 
 type CurrentNote = {
   title: '',
   content: '',
   friendlyCreateAt?: string,
   friendlyUpdatedAt?: string,
-  statusText?: string,
 }
 validLogin();
 const currentNote = ref<NoteItem | CurrentNote>({title: '', content: ''});
 const notes = ref<NoteItem[]>([]);
 const route = useRoute();
+const statusText = ref('未改动');
+const timer = ref<null | number>(null);
 const onUpdateNotes = (value: NoteItem[]) => {
   notes.value = value;
   currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId) || {title: '', content: ''};
 };
 onBeforeRouteUpdate(to => {
+  statusText.value = '未改动';
   currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId) || {title: '', content: ''};
 });
+const onInput = () => {
+  if (timer.value !== null) {
+    clearTimeout(timer.value);
+  }
+  timer.value = setTimeout(() => {
+    if (!currentNote.value.hasOwnProperty('id')) return;
+    Notes.updateNote(
+        {noteId: (currentNote.value as NoteItem).id},
+        {title: currentNote.value.title, content: currentNote.value.content})
+        .then(() => {
+          statusText.value = '已保存';
+        })
+        .catch(() => {
+          statusText.value = '保存出错';
+        });
+  }, 300);
+};
+const onKeyDown = () => statusText.value = '编辑中...';
 </script>
 
 <template>
@@ -35,15 +56,23 @@ onBeforeRouteUpdate(to => {
         <div class="note-bar">
           <span>创建日期：{{ currentNote.friendlyCreateAt }}</span>
           <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
-          <span>{{ currentNote.statusText }}</span>
+          <span>{{ statusText }}</span>
           <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
           <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
         </div>
         <div class="note-title">
-          <input type="text" v-model="currentNote.title" placeholder="输入标题"/>
+          <input type="text"
+                 v-model="currentNote.title"
+                 @input="onInput"
+                 @keydown="onKeyDown"
+                 placeholder="输入标题"/>
         </div>
         <div class="note-editor">
-          <textarea v-show="true" v-model="currentNote.content" placeholder="输入内容，支持 markdown 语法"/>
+          <textarea v-show="true"
+                    v-model="currentNote.content"
+                    @input="onInput"
+                    @keydown="onKeyDown"
+                    placeholder="输入内容，支持 markdown 语法"/>
           <div class="note-preview markdown-body" v-show="false"/>
         </div>
       </template>
