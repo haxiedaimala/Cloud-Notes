@@ -4,6 +4,7 @@ import NoteSidebar from '../components/NoteSidebar.vue';
 import {ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute} from 'vue-router';
 import Notes from '../api/notes';
+import antiShake from '../helpers/antiShake';
 
 type CurrentNote = {
   title: '',
@@ -16,7 +17,6 @@ const currentNote = ref<NoteItem | CurrentNote>({title: '', content: ''});
 const notes = ref<NoteItem[]>([]);
 const route = useRoute();
 const statusText = ref('未改动');
-const timer = ref<null | number>(null);
 const onUpdateNotes = (value: NoteItem[]) => {
   notes.value = value;
   currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId) || {title: '', content: ''};
@@ -25,23 +25,18 @@ onBeforeRouteUpdate(to => {
   statusText.value = '未改动';
   currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId) || {title: '', content: ''};
 });
-const onInput = () => {
-  if (timer.value !== null) {
-    clearTimeout(timer.value);
-  }
-  timer.value = setTimeout(() => {
-    if (!currentNote.value.hasOwnProperty('id')) return;
-    Notes.updateNote(
-        {noteId: (currentNote.value as NoteItem).id},
-        {title: currentNote.value.title, content: currentNote.value.content})
-        .then(() => {
-          statusText.value = '已保存';
-        })
-        .catch(() => {
-          statusText.value = '保存出错';
-        });
-  }, 300);
-};
+const onInput = () => antiShake(function () {
+  if (!currentNote.value.hasOwnProperty('id')) return;
+  Notes.updateNote(
+      {noteId: (currentNote.value as NoteItem).id},
+      {title: currentNote.value.title, content: currentNote.value.content})
+      .then(() => {
+        statusText.value = '已保存';
+      })
+      .catch(() => {
+        statusText.value = '保存出错';
+      });
+});
 const onKeyDown = () => statusText.value = '编辑中...';
 </script>
 
