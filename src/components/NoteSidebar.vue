@@ -90,9 +90,15 @@ watchPostEffect(() => {
 </template>
 
 <style lang="scss" scoped>
+@import "../assets/helper";
+
 .note-sidebar {
-  width: 290px;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
   border-right: 1px solid #ccc;
+  overflow-y: scroll;
+  @extend %scroll;
 
   .note-head {
     position: relative;
@@ -149,6 +155,10 @@ watchPostEffect(() => {
   }
 
   .notes {
+    flex: 1;
+    overflow-y: scroll;
+    @extend %scroll;
+
     li {
       &:nth-child(odd) {
         background-color: #f2f2f2;
@@ -158,8 +168,6 @@ watchPostEffect(() => {
         a {
           color: #1687ea;
         }
-
-        //border: 1px solid #ccc;
       }
 
       a {

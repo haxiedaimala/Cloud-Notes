@@ -65,13 +65,12 @@ const onDeleteNote = () => {
           <span class="icon-wrapper" @click="onDeleteNote"><i class="iconfont icon-trash"/></span>
           <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
         </div>
-        <div class="note-title">
-          <input type="text"
-                 v-model="currentNote.title"
-                 @input="onInput"
-                 @keydown="onKeyDown"
-                 placeholder="输入标题"/>
-        </div>
+        <input type="text"
+               class="note-title"
+               v-model="currentNote.title"
+               @input="onInput"
+               @keydown="onKeyDown"
+               placeholder="输入标题"/>
         <div class="note-editor">
           <textarea v-show="true"
                     v-model="currentNote.content"
@@ -107,7 +106,7 @@ const onDeleteNote = () => {
     }
 
     .note-bar {
-      padding: 0.4em 1.2em;
+      padding: 0.4em 1.5em;
       border-bottom: 1px solid #eee;
 
       &::after {
@@ -136,24 +135,22 @@ const onDeleteNote = () => {
     }
 
     .note-title {
-      input {
-        display: inline-block;
-        width: 100%;
-        font-size: 18px;
-        padding: 1em 1.2em;
-        border: none;
-        outline: none;
-      }
+      display: inline-block;
+      font-size: 18px;
+      padding: 1em 1.5em;
+      border: none;
+      outline: none;
     }
 
     .note-editor {
       flex: 1;
+      display: flex;
 
       textarea,
       .note-preview {
-        width: 100%;
-        height: 100%;
-        padding: 1em 1.2em;
+        flex: 1;
+        line-height: 1.5;
+        padding: 1em 2em 2em;
       }
 
       textarea {
