@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute, useRouter} from 'vue-router';
 import Notes from '../api/notes';
 import antiShake from '../helpers/antiShake';
 import {ElMessage} from 'element-plus';
+import MarkdownIt from 'markdown-it';
 
 type CurrentNote = {
   title: '',
@@ -19,6 +20,8 @@ const notes = ref<NoteItem[]>([]);
 const route = useRoute();
 const router = useRouter();
 const statusText = ref('未改动');
+const isPreview = ref(true);
+const markdown = computed(() => new MarkdownIt().render(currentNote.value.content));
 const onUpdateNotes = (value: NoteItem[]) => {
   notes.value = value;
   currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId) || {title: '', content: ''};
@@ -48,6 +51,7 @@ const onDeleteNote = () => {
         router.replace({path: '/note'});
       });
 };
+const onTogglePreview = () => isPreview.value = !isPreview.value;
 </script>
 
 <template>
@@ -63,7 +67,9 @@ const onDeleteNote = () => {
           <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
           <span>{{ statusText }}</span>
           <span class="icon-wrapper" @click="onDeleteNote"><i class="iconfont icon-trash"/></span>
-          <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
+          <span class="icon-wrapper" @click="onTogglePreview">
+            <i class="iconfont" :class="{'icon-eye':!isPreview,'icon-edit':isPreview}"/>
+          </span>
         </div>
         <input type="text"
                class="note-title"
@@ -72,12 +78,12 @@ const onDeleteNote = () => {
                @keydown="onKeyDown"
                placeholder="输入标题"/>
         <div class="note-editor">
-          <textarea v-show="true"
+          <textarea v-show="!isPreview"
                     v-model="currentNote.content"
                     @input="onInput"
                     @keydown="onKeyDown"
                     placeholder="输入内容，支持 markdown 语法"/>
-          <div class="note-preview markdown-body" v-show="false"/>
+          <div class="note-preview" v-html="markdown" v-show="isPreview"/>
         </div>
       </template>
     </div>
@@ -85,6 +91,8 @@ const onDeleteNote = () => {
 </template>
 
 <style lang="scss" scoped>
+@import "../assets/helper";
+
 .layout {
   flex: 1;
   display: flex;
@@ -95,6 +103,8 @@ const onDeleteNote = () => {
     flex-direction: column;
     flex: 1;
     background-color: #fff;
+    overflow-y: scroll;
+    @extend %scroll;
 
     .note-empty {
       position: absolute;
@@ -145,12 +155,20 @@ const onDeleteNote = () => {
     .note-editor {
       flex: 1;
       display: flex;
+      overflow-y: scroll;
+      @extend %scroll;
 
       textarea,
       .note-preview {
         flex: 1;
         line-height: 1.5;
         padding: 1em 2em 2em;
+        word-break: break-all;
+        word-wrap: break-word;
+      }
+
+      .note-preview {
+        overflow-y: scroll;
       }
 
       textarea {
