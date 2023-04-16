@@ -26,7 +26,19 @@ export default {
     });
   },
   addNote({notebookId}: { notebookId: number }, {title = '', content = ''} = {title: '', content: ''}) {
-    return request(URL.ADD.replace(':notebookId', notebookId.toString()), 'POST', {title, content});
+    return new Promise((resolve, reject) => {
+      request(URL.ADD.replace(':notebookId', notebookId.toString()), 'POST', {title, content})
+        .then(data => {
+          const result = data as CreateNote;
+          result.data!.friendlyUpdatedAt = friendlyDate(result.data!.updatedAt);
+          result.data!.friendlyCreateAt = friendlyDate(result.data!.createdAt);
+          resolve(data);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+    // return request(URL.ADD.replace(':notebookId', notebookId.toString()), 'POST', {title, content});
   },
   updateNote({noteId}: { noteId: number }, {title, content}: { title?: string, content?: string }) {
     return request(URL.UPDATE.replace(':noteId', noteId.toString()), 'PATCH', {title, content});

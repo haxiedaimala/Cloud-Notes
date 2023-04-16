@@ -61,7 +61,7 @@ interface NoteList {
 
 interface CreateNote {
   msg: string,
-  data?: NoteItem[]
+  data?: NoteItem
 }
 
 interface DeleteNote {

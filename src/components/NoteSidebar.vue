@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import {ArrowDown} from '@element-plus/icons-vue';
-import {onBeforeMount, ref} from 'vue';
+import {onBeforeMount, ref, watchPostEffect} from 'vue';
 import Notebooks from '../api/notebooks';
 import Notes from '../api/notes';
 import {useRoute, useRouter} from 'vue-router';
+import {ElMessage} from 'element-plus';
 
 const notebooks = ref<NotebookItem[]>([]);
 const notes = ref<NoteItem[]>([]);
 const currentBook = ref<NotebookItem>();
+const currentNote = ref<NoteItem>();
 const route = useRoute();
 const router = useRouter();
 const emits = defineEmits<{
@@ -35,12 +37,25 @@ const handleCommand = (command: string | number | object) => {
     notes.value = (data as NoteList).data;
   });
 };
+const onCreateNote = () => {
+  if (currentBook.value === undefined) return;
+  Notes.addNote({notebookId: currentBook.value.id})
+      .then(data => {
+        const result = data as CreateNote;
+        ElMessage.success(result.msg);
+        notes.value.unshift(result.data as NoteItem);
+      });
+};
+watchPostEffect(() => {
+  if (notes.value.length === 0) return;
+  currentNote.value = notes.value.find(item => item.id.toString() === route.query.noteId);
+});
 </script>
 
 <template>
   <div class="note-sidebar">
     <div class="note-head">
-      <span class="note-add">添加笔记</span>
+      <span class="note-add" @click="onCreateNote">添加笔记</span>
       <el-dropdown class="notebook-title" @command="handleCommand" max-height="80vh">
         <span class="el-dropdown-link">
          {{ currentBook && currentBook.title }}<el-icon class="el-icon--right"><arrow-down/></el-icon>
@@ -58,11 +73,13 @@ const handleCommand = (command: string | number | object) => {
       </el-dropdown>
     </div>
     <div class="menu">
-      <span>标题</span>
       <span>更新时间</span>
+      <span>标题</span>
     </div>
     <ul class="notes">
-      <li v-for="note in notes" :key="note.id">
+      <li v-for="note in notes"
+          :key="note.id"
+          :class="{active:currentNote && note.id===currentNote.id}">
         <router-link :to="`/note?noteId=${note.id}&&notebookId=${currentBook&&currentBook.id}`">
           <span class="note-date">{{ note.friendlyUpdatedAt }}</span>
           <span class="note-title">{{ note.title }}</span>
@@ -135,6 +152,14 @@ const handleCommand = (command: string | number | object) => {
     li {
       &:nth-child(odd) {
         background-color: #f2f2f2;
+      }
+
+      &.active {
+        a {
+          color: #1687ea;
+        }
+
+        //border: 1px solid #ccc;
       }
 
       a {
