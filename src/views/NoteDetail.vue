@@ -7,6 +7,7 @@ import Notes from '../api/notes';
 import antiShake from '../helpers/antiShake';
 import {ElMessage} from 'element-plus';
 import MarkdownIt from 'markdown-it';
+import 'github-markdown-css';
 
 type CurrentNote = {
   title: '',
@@ -83,7 +84,7 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
                     @input="onInput"
                     @keydown="onKeyDown"
                     placeholder="输入内容，支持 markdown 语法"/>
-          <div class="note-preview" v-html="markdown" v-show="isPreview"/>
+          <div class="note-preview markdown-body" v-html="markdown" v-show="isPreview"/>
         </div>
       </template>
     </div>
