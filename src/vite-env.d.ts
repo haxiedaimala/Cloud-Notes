@@ -63,3 +63,7 @@ interface CreateNote {
   msg: string,
   data?: NoteItem[]
 }
+
+interface DeleteNote {
+  msg: string;
+}

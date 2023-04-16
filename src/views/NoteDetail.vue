@@ -2,9 +2,10 @@
 import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
 import {ref} from 'vue';
-import {onBeforeRouteUpdate, useRoute} from 'vue-router';
+import {onBeforeRouteUpdate, useRoute, useRouter} from 'vue-router';
 import Notes from '../api/notes';
 import antiShake from '../helpers/antiShake';
+import {ElMessage} from 'element-plus';
 
 type CurrentNote = {
   title: '',
@@ -16,6 +17,7 @@ validLogin();
 const currentNote = ref<NoteItem | CurrentNote>({title: '', content: ''});
 const notes = ref<NoteItem[]>([]);
 const route = useRoute();
+const router = useRouter();
 const statusText = ref('未改动');
 const onUpdateNotes = (value: NoteItem[]) => {
   notes.value = value;
@@ -38,6 +40,14 @@ const onInput = () => antiShake(function () {
       });
 });
 const onKeyDown = () => statusText.value = '编辑中...';
+const onDeleteNote = () => {
+  Notes.deleteNote({noteId: (currentNote.value as NoteItem).id})
+      .then(data => {
+        ElMessage.success((data as DeleteNote).msg);
+        notes.value.splice(notes.value.indexOf(currentNote.value as NoteItem), 1);
+        router.replace({path: '/note'});
+      });
+};
 </script>
 
 <template>
@@ -52,7 +62,7 @@ const onKeyDown = () => statusText.value = '编辑中...';
           <span>创建日期：{{ currentNote.friendlyCreateAt }}</span>
           <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
           <span>{{ statusText }}</span>
-          <span class="icon-wrapper"><i class="iconfont icon-trash"/></span>
+          <span class="icon-wrapper" @click="onDeleteNote"><i class="iconfont icon-trash"/></span>
           <span class="icon-wrapper"><i class="iconfont icon-fullscreen"/></span>
         </div>
         <div class="note-title">
