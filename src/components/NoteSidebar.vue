@@ -1,54 +1,36 @@
 <script setup lang="ts">
 import {ArrowDown} from '@element-plus/icons-vue';
-import {onBeforeMount, ref, watchPostEffect} from 'vue';
-import Notebooks from '../api/notebooks';
-import Notes from '../api/notes';
+import {onBeforeMount, watchPostEffect} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import {ElMessage} from 'element-plus';
+import {useNotebookStore} from '../store/notebook';
+import {useNoteStore} from '../store/note';
+import {storeToRefs} from 'pinia';
 
-const notebooks = ref<NotebookItem[]>([]);
-const notes = ref<NoteItem[]>([]);
-const currentBook = ref<NotebookItem>();
-const currentNote = ref<NoteItem>();
+const notebookStore = useNotebookStore();
+const noteStore = useNoteStore();
+const {notebooks, currentBook} = storeToRefs(notebookStore);
+const {notes, currentNote} = storeToRefs(noteStore);
 const route = useRoute();
 const router = useRouter();
-const emits = defineEmits<{
-  (e: 'update:notes', value: NoteItem[]): void
-}>();
+
 onBeforeMount(() => {
-  Notebooks.getAll()
-      .then(result => {
-        const data = (result as NotebookList).data;
-        notebooks.value = data;
-        if (data.length === 0) return;
-        //获取最新创建的笔记本信息--直接访问笔记页面（无notebookId），点击笔记本列表进入（有notebookId）
-        currentBook.value = data.find(notebook => notebook.id.toString() === route.query.notebookId) || data[0];
-        return Notes.getAll({notebookId: currentBook.value!.id});
-      })
-      .then(result => {
-        notes.value = (result as NoteList).data;
-        emits('update:notes', notes.value);
+  notebookStore.getNotebooks()
+      .then(() => {
+        notebookStore.setCurrentBookId({notebookId: parseInt(route.query.notebookId as string)});
+        noteStore.getNotes({notebookId: currentBook.value!.id});
       });
 });
 const handleCommand = (command: string | number | object) => {
   if (command === 'trash') return router.push({path: '/trash'});
-  currentBook.value = notebooks.value.find(notebook => notebook.id === (command as number));
-  Notes.getAll({notebookId: command as number}).then(data => {
-    notes.value = (data as NoteList).data;
-  });
+  notebookStore.setCurrentBookId({notebookId: command as number});
+  noteStore.getNotes({notebookId: command as number});
 };
 const onCreateNote = () => {
   if (currentBook.value === undefined) return;
-  Notes.addNote({notebookId: currentBook.value.id})
-      .then(data => {
-        const result = data as CreateNote;
-        ElMessage.success(result.msg);
-        notes.value.unshift(result.data as NoteItem);
-      });
+  noteStore.addNote({notebookId: currentBook.value.id});
 };
 watchPostEffect(() => {
-  if (notes.value.length === 0) return;
-  currentNote.value = notes.value.find(item => item.id.toString() === route.query.noteId);
+  noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
 });
 </script>
 

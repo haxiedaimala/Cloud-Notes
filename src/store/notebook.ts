@@ -6,19 +6,25 @@ import {ElMessage} from 'element-plus';
 export const useNotebookStore = defineStore('notebook', () => {
   //state
   const notebookList = ref<NotebookItem[]>([]);
+  const currentBookId = ref<number | null>(null);
   //getters
   const notebooks = computed(() => notebookList.value);
+  const currentBook = computed(() => {
+    if (notebooks.value.length === 0) return;
+    if (currentBookId.value === null) return notebooks.value[0];
+    return notebooks.value.find(notebook => notebook.id === currentBookId.value);
+  });
 
   //actions
   function getNotebooks() {
-    Notebooks.getAll()
+    return Notebooks.getAll()
       .then(result => {
         notebookList.value = (result as NotebookList).data;
       });
   }
 
   function addNotebook({title}: { title: string }) {
-    Notebooks.addNotebook({title: title})
+    return Notebooks.addNotebook({title: title})
       .then(data => {
         notebookList.value.unshift((data as CreateNotebook).data!);
         ElMessage.success((data as CreateNotebook).msg);
@@ -26,7 +32,7 @@ export const useNotebookStore = defineStore('notebook', () => {
   }
 
   function updateNotebook({notebookId, title}: { notebookId: number, title: string }) {
-    Notebooks.updateNotebook(notebookId, {title})
+    return Notebooks.updateNotebook(notebookId, {title})
       .then((data) => {
         const findNotebook = notebookList.value.find(item => item.id === notebookId);
         if (findNotebook === undefined) return;
@@ -36,18 +42,25 @@ export const useNotebookStore = defineStore('notebook', () => {
   }
 
   function deleteNotebook({notebookId}: { notebookId: number }) {
-    Notebooks.deleteNotebook(notebookId)
+    return Notebooks.deleteNotebook(notebookId)
       .then((data) => {
         notebookList.value = notebookList.value.filter(item => item.id !== notebookId);
         ElMessage.success((data as DeleteNotebook).msg);
       });
   }
 
+  function setCurrentBookId({notebookId}: { notebookId: number }) {
+    if (isNaN(notebookId)) return;
+    currentBookId.value = notebookId;
+  }
+
   return {
     notebooks,
+    currentBook,
     getNotebooks,
     addNotebook,
     updateNotebook,
-    deleteNotebook
+    deleteNotebook,
+    setCurrentBookId,
   };
 });
