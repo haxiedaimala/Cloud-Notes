@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
-import {computed, ref} from 'vue';
+import {computed, onBeforeMount, ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute, useRouter} from 'vue-router';
-import Notes from '../api/notes';
 import antiShake from '../helpers/antiShake';
-import {ElMessage} from 'element-plus';
 import MarkdownIt from 'markdown-it';
 import 'github-markdown-css';
+import {useNoteStore} from '../store/note';
 
 type CurrentNote = {
   title: '',
@@ -15,40 +14,38 @@ type CurrentNote = {
   friendlyCreateAt?: string,
   friendlyUpdatedAt?: string,
 }
-validLogin();
-const currentNote = ref<NoteItem | CurrentNote>({title: '', content: ''});
-const notes = ref<NoteItem[]>([]);
+const noteStore = useNoteStore();
+const currentNote = computed<NoteItem | CurrentNote>(() => noteStore.currentNote || {title: '', content: ''});
 const route = useRoute();
 const router = useRouter();
 const statusText = ref('未改动');
 const isPreview = ref(true);
 const markdown = computed(() => new MarkdownIt().render(currentNote.value.content));
-const onUpdateNotes = (value: NoteItem[]) => {
-  notes.value = value;
-  currentNote.value = notes.value.find(note => note.id.toString() === route.query.noteId) || {title: '', content: ''};
-};
+onBeforeMount(() => {
+  validLogin();
+  noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
+});
 onBeforeRouteUpdate(to => {
   statusText.value = '未改动';
-  currentNote.value = notes.value.find(note => note.id.toString() === to.query.noteId) || {title: '', content: ''};
+  isPreview.value = true;
+  noteStore.setCurrentNoteId({noteId: parseInt(to.query.noteId as string)});
 });
 const onInput = () => antiShake(function () {
   if (!currentNote.value.hasOwnProperty('id')) return;
-  Notes.updateNote(
-      {noteId: (currentNote.value as NoteItem).id},
-      {title: currentNote.value.title, content: currentNote.value.content})
-      .then(() => {
-        statusText.value = '已保存';
-      })
-      .catch(() => {
-        statusText.value = '保存出错';
-      });
+  noteStore.updateNote({
+    noteId: (currentNote.value as NoteItem).id,
+    title: currentNote.value.title,
+    content: currentNote.value.content
+  }).then(() => {
+    statusText.value = '已保存';
+  }).catch(() => {
+    statusText.value = '保存出错';
+  });
 });
 const onKeyDown = () => statusText.value = '编辑中...';
 const onDeleteNote = () => {
-  Notes.deleteNote({noteId: (currentNote.value as NoteItem).id})
-      .then(data => {
-        ElMessage.success((data as DeleteNote).msg);
-        notes.value.splice(notes.value.indexOf(currentNote.value as NoteItem), 1);
+  noteStore.deleteNote({noteId: (currentNote.value as NoteItem).id})
+      .then(() => {
         router.replace({path: '/note'});
       });
 };
@@ -57,7 +54,7 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
 
 <template>
   <div class="layout">
-    <NoteSidebar @update:notes="onUpdateNotes"/>
+    <NoteSidebar/>
     <div class="note-detail">
       <template v-if="!currentNote.id">
         <div class="note-empty">请选择笔记</div>
@@ -74,6 +71,7 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
         </div>
         <input type="text"
                class="note-title"
+               :disabled="isPreview"
                v-model="currentNote.title"
                @input="onInput"
                @keydown="onKeyDown"

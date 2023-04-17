@@ -32,6 +32,24 @@ export const useNoteStore = defineStore('note', () => {
       });
   }
 
+  function updateNote({noteId, title, content}: { noteId: number, title: string, content: string }) {
+    return Notes.updateNote({noteId}, {title, content})
+      .then(() => {
+        let findNote = noteList.value.find(note => note.id === noteId);
+        if (findNote === undefined) return;
+        findNote.title = title;
+        findNote.content = content;
+      });
+  }
+
+  function deleteNote({noteId}: { noteId: number }) {
+    return Notes.deleteNote({noteId})
+      .then(data => {
+        noteList.value.splice(noteList.value.indexOf(currentNote.value as NoteItem), 1);
+        ElMessage.success((data as DeleteNote).msg);
+      });
+  }
+
   function setCurrentNoteId({noteId}: { noteId: number }) {
     if (isNaN(noteId)) return;
     currentNoteId.value = noteId;
@@ -42,6 +60,8 @@ export const useNoteStore = defineStore('note', () => {
     currentNote,
     getNotes,
     addNote,
+    updateNote,
+    deleteNote,
     setCurrentNoteId,
   };
 });
