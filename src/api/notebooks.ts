@@ -16,6 +16,7 @@ export default {
           result.data = result.data.sort((a: NotebookItem, b: NotebookItem) => a.createdAt < b.createdAt ? 1 : -1);
           result.data.forEach(item => {
             item.friendlyCreatedAt = friendlyDate(item.createdAt);
+            item.friendlyUpdateAt = friendlyDate(item.updatedAt);
           });
           resolve(result);
         })
@@ -25,7 +26,19 @@ export default {
     });
   },
   addNotebook({title = ''} = {title: ''}) {
-    return request(URL.ADD, 'POST', {title});
+    return new Promise((resolve, reject) => {
+      request(URL.ADD, 'POST', {title})
+        .then(data => {
+          const result = data as CreateNotebook;
+          result.data!.noteCounts = 0;
+          result.data!.friendlyCreatedAt = friendlyDate(result.data!.createdAt);
+          result.data!.friendlyUpdateAt = friendlyDate(result.data!.updatedAt);
+          resolve(result);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
   },
   updateNotebook(notebookId: number, {title = ''} = {title: ''}) {
     return request(URL.UPDATE.replace(':notebookId', notebookId.toString()), 'PATCH', {title});

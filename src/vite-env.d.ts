@@ -17,6 +17,7 @@ interface NotebookItem {
   'updatedAt': string,
   'noteCounts': number,
   'friendlyCreatedAt': string,
+  'friendlyUpdateAt': string
 }
 
 interface NotebookList {
@@ -25,13 +26,7 @@ interface NotebookList {
 
 interface CreateNotebook {
   msg: string;
-  data?: {
-    'id': number,
-    'title': string,
-    'userId': number,
-    'createdAt': string,
-    'updatedAt': string,
-  };
+  data?: NotebookItem;
 }
 
 interface DeleteNotebook {

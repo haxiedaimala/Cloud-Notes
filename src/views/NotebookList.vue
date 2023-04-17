@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {validLogin} from '../helpers/validLogin';
-import Notebooks from '../api/notebooks';
-import friendlyDate from '../helpers/friendlyDate';
-import {ref} from 'vue';
-import {ElMessage, ElMessageBox} from 'element-plus';
+import {computed, onBeforeMount} from 'vue';
+import {ElMessageBox} from 'element-plus';
+import {useNotebookStore} from '../store/notebook';
 
-validLogin();
-let notebooks = ref<NotebookItem[]>([]);
-Notebooks.getAll().then(result => {
-  notebooks.value = (result as NotebookList).data;
+const notebookStore = useNotebookStore();
+const notebooks = computed(() => notebookStore.notebooks);
+onBeforeMount(() => {
+  validLogin();
+  notebookStore.getNotebooks();
 });
 const onCreate = () => {
   ElMessageBox.prompt('请输入笔记本标题', '创建笔记本', {
@@ -18,21 +18,11 @@ const onCreate = () => {
     inputErrorMessage: '标题不为空，且不超过30个字符',
   })
       .then(({value}) => {
-        return Notebooks.addNotebook({title: value});
-      })
-      .then(data => {
-        const result = data as CreateNotebook;
-        notebooks.value.unshift({
-          ...result.data!,
-          noteCounts: 0,
-          friendlyCreatedAt: friendlyDate(result.data!.createdAt)
-        });
-        ElMessage.success(result.msg);
+        notebookStore.addNotebook({title: value});
       })
       .catch(error => { if (error === 'cancel') return; });
 };
 const onEdit = (notebook: NotebookItem) => {
-  let title = '';
   ElMessageBox.prompt('请输入新笔记本标题', '修改笔记本', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -41,12 +31,7 @@ const onEdit = (notebook: NotebookItem) => {
     inputValue: notebook.title
   })
       .then(({value}) => {
-        title = value;
-        return Notebooks.updateNotebook(notebook.id, {title});
-      })
-      .then(data => {
-        notebook.title = title;
-        ElMessage.success((data as UpdateNotebook).msg);
+        notebookStore.updateNotebook({notebookId: notebook.id, title: value});
       })
       .catch(error => {if (error === 'cancel') return;});
 };
@@ -57,11 +42,7 @@ const onDelete = (notebook: NotebookItem) => {
     type: 'warning',
   })
       .then(() => {
-        return Notebooks.deleteNotebook(notebook.id);
-      })
-      .then(data => {
-        notebooks.value.splice(notebooks.value.indexOf(notebook), 1);
-        ElMessage.success((data as DeleteNotebook).msg);
+        notebookStore.deleteNotebook({notebookId: notebook.id});
       })
       .catch(error => {if (error === 'cancel') return;});
 };
