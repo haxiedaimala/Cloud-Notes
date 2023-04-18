@@ -73,3 +73,11 @@ interface DeleteNote {
 interface TrashNoteList {
   data: NoteItem[];
 }
+
+interface DeleteTrashNote {
+  msg: string;
+}
+
+interface RevertTrashNote {
+  msg: string;
+}

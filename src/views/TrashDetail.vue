@@ -1,39 +1,40 @@
 <script setup lang="ts">
-import {computed, onBeforeMount, ref} from 'vue';
+import {computed, onBeforeMount, watchPostEffect} from 'vue';
 import {useAuthStore} from '../store/auth';
+import {useTrashStore} from '../store/trash';
 import MarkdownIt from 'markdown-it';
+import {storeToRefs} from 'pinia';
+import {useRoute, useRouter} from 'vue-router';
+import {useNotebookStore} from '../store/notebook';
 
+const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
-const currentTrashNote = ref({
-  id: 2,
-  title: 'hhh',
-  content: '# title',
-  friendlyCreateAt: '3天前',
-  friendlyUpdatedAt: '刚刚',
-});
-const belongTo = ref('我的笔记本');
-const trashNotes = ref([
-  {
-    id: 2,
-    title: 'hhh',
-    content: '# title',
-    friendlyCreateAt: '3天前',
-    friendlyUpdatedAt: '刚刚',
-  },
-  {
-    id: 3,
-    title: 'sss',
-    content: '# 5896',
-    friendlyCreateAt: '25天前',
-    friendlyUpdatedAt: '3分钟前',
-  }
-]);
-const markdown = computed(() => new MarkdownIt().render(currentTrashNote.value.content));
+const trashStore = useTrashStore();
+const notebookStore = useNotebookStore();
+const {currentTrashNote, trashNotes, belongTo} = storeToRefs(trashStore);
+const markdown = computed(() => new MarkdownIt().render(currentTrashNote.value!.content));
 onBeforeMount(() => {
   authStore.checkLogin();
+  notebookStore.getNotebooks();
+  trashStore.getTrashNotes()
+      .then(() => {
+        trashStore.setCurrentNote({noteId: parseInt(route.query.noteId as string)});
+      });
 });
-const onDeleteNote = () => {console.log('delete');};
-const onRevertNote = () => {console.log('revert');};
+watchPostEffect(() => {
+  trashStore.setCurrentNote({noteId: parseInt(route.query.noteId as string)});
+});
+const onDeleteNote = () => {
+  trashStore.deleteTrashNote({noteId: (currentTrashNote.value as NoteItem).id}).then(() => {
+    router.replace({path: '/trash'});
+  });
+};
+const onRevertNote = () => {
+  trashStore.revertTrashNote({noteId: (currentTrashNote.value as NoteItem).id}).then(() => {
+    router.replace({path: '/trash'});
+  });
+};
 </script>
 
 <template>
@@ -56,7 +57,7 @@ const onRevertNote = () => {console.log('revert');};
       </ul>
     </div>
     <div class="trash-detail">
-      <template v-if="!currentTrashNote.id">
+      <template v-if="currentTrashNote===undefined">
         <div class="trash-empty">请选择笔记</div>
       </template>
       <template v-else>
