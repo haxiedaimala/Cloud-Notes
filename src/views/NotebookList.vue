@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import {validLogin} from '../helpers/validLogin';
 import {computed, onBeforeMount} from 'vue';
 import {ElMessageBox} from 'element-plus';
 import {useNotebookStore} from '../store/notebook';
+import {useAuthStore} from '../store/auth';
 
 const notebookStore = useNotebookStore();
+const authStore = useAuthStore();
 const notebooks = computed(() => notebookStore.notebooks);
 onBeforeMount(() => {
-  validLogin();
+  authStore.checkLogin();
   notebookStore.getNotebooks();
 });
 const onCreate = () => {

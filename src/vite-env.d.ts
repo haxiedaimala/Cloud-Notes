@@ -1,14 +1,19 @@
 /// <reference types="vite/client" />
 interface UserInfo {
-  isLogin: boolean,
-  data?: {
-    createdAt: string,
-    id: number
-    updatedAt: string
-    username: string
-  }
+  createdAt: string,
+  id: number
+  updatedAt: string
+  username: string
 }
 
+interface LoginInfo {
+  isLogin: boolean,
+  data?: UserInfo
+}
+interface RegisterInfo {
+  isLogin: boolean,
+  data?: UserInfo
+}
 interface NotebookItem {
   'id': number,
   'title': string,

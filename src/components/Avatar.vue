@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {computed, inject, Ref} from 'vue';
+import {useAuthStore} from '../store/auth';
+import {storeToRefs} from 'pinia';
 
-const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
-const username = computed(() => userInfo.value.username);
-const slug = computed(() => username.value.charAt(0));
+const authStore = useAuthStore();
+const {username, slug} = storeToRefs(authStore);
 </script>
 
 <template>

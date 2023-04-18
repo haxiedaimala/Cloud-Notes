@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import {validLogin} from '../helpers/validLogin';
+import {onBeforeMount} from 'vue';
+import {useAuthStore} from '../store/auth';
 
-validLogin();
+const authStore = useAuthStore();
+onBeforeMount(() => {
+  authStore.checkLogin();
+});
 </script>
 
 <template>

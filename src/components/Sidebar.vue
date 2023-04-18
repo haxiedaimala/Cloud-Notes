@@ -1,17 +1,9 @@
 <script setup lang="ts">
 import Avatar from './Avatar.vue';
-import Auth from '../api/auth';
-import {useRouter} from 'vue-router';
-import {inject, Ref} from 'vue';
+import {useAuthStore} from '../store/auth';
 
-const router = useRouter();
-const userInfo = inject<Ref<{ username: string }>>('userInfo')!;
-const onLogout = () => {
-  Auth.logout().then(() => {
-    userInfo.value.username = '未登录';
-    router.push({path: '/login'});
-  });
-};
+const authStore = useAuthStore();
+const onLogout = () => authStore.logout();
 </script>
 
 <template>

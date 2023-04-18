@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {computed, inject, Ref, ref, watchPostEffect} from 'vue';
-import Auth from '../api/auth';
+import {computed, ref, watchPostEffect} from 'vue';
 import {useRouter} from 'vue-router';
+import {useAuthStore} from '../store/auth';
 
-const userNameInfo = inject<Ref<{ username: string }>>('userInfo')!;
+const authStore = useAuthStore();
 const router = useRouter();
 const isLogin = ref(true);
 const userInfo = ref({
@@ -45,18 +45,19 @@ const validInfo = () => {
 const onSubmit = () => {
   if (!validInfo()) return;
   const type = isLogin.value ? 'login' : 'register';
-  Auth[type]({
+  authStore[type]({
     username: userInfo.value.username,
     password: userInfo.value.password
-  }).then(() => {
-    userInfo.value.isError = false;
-    userInfo.value.notice = '';
-    userNameInfo.value.username = userInfo.value.username;
-    router.push({path: '/notebooks'});
-  }).catch(error => {
-    userInfo.value.isError = true;
-    userInfo.value.notice = error.msg;
-  });
+  })
+      .then(() => {
+        userInfo.value.isError = false;
+        userInfo.value.notice = '';
+        router.push({path: '/notebooks'});
+      })
+      .catch(error => {
+        userInfo.value.isError = true;
+        userInfo.value.notice = error.msg;
+      });
 };
 </script>
 

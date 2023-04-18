@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {validLogin} from '../helpers/validLogin';
 import NoteSidebar from '../components/NoteSidebar.vue';
 import {computed, onBeforeMount, ref} from 'vue';
 import {onBeforeRouteUpdate, useRoute, useRouter} from 'vue-router';
@@ -7,6 +6,7 @@ import antiShake from '../helpers/antiShake';
 import MarkdownIt from 'markdown-it';
 import 'github-markdown-css';
 import {useNoteStore} from '../store/note';
+import {useAuthStore} from '../store/auth';
 
 type CurrentNote = {
   title: '',
@@ -15,6 +15,7 @@ type CurrentNote = {
   friendlyUpdatedAt?: string,
 }
 const noteStore = useNoteStore();
+const authStore=useAuthStore()
 const currentNote = computed<NoteItem | CurrentNote>(() => noteStore.currentNote || {title: '', content: ''});
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +23,7 @@ const statusText = ref('未改动');
 const isPreview = ref(true);
 const markdown = computed(() => new MarkdownIt().render(currentNote.value.content));
 onBeforeMount(() => {
-  validLogin();
+  authStore.checkLogin()
   noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
 });
 onBeforeRouteUpdate(to => {
