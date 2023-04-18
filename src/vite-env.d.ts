@@ -10,10 +10,12 @@ interface LoginInfo {
   isLogin: boolean,
   data?: UserInfo
 }
+
 interface RegisterInfo {
   isLogin: boolean,
   data?: UserInfo
 }
+
 interface NotebookItem {
   'id': number,
   'title': string,
@@ -66,4 +68,8 @@ interface CreateNote {
 
 interface DeleteNote {
   msg: string;
+}
+
+interface TrashNoteList {
+  data: NoteItem[];
 }
