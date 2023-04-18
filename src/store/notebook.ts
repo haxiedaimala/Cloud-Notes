@@ -17,6 +17,7 @@ export const useNotebookStore = defineStore('notebook', () => {
 
   //actions
   function getNotebooks() {
+    if (notebookList.value.length !== 0) return Promise.resolve();
     return Notebooks.getAll()
       .then(result => {
         notebookList.value = (result as NotebookList).data;

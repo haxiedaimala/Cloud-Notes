@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   //actions
   function checkLogin() {
+    if (user.value !== null) return Promise.resolve();
     return Auth.getInfo()
       .then(data => {
         const result = data as LoginInfo;
