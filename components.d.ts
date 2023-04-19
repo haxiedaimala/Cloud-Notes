@@ -10,14 +10,11 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Avatar: typeof import('./src/components/Avatar.vue')['default']
-    ElAlert: typeof import('element-plus/es')['ElAlert']
-    ElButton: typeof import('element-plus/es')['ElButton']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     NoteSidebar: typeof import('./src/components/NoteSidebar.vue')['default']
-    NoteSideBar: typeof import('./src/components/NoteSidebar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./src/components/Sidebar.vue')['default']

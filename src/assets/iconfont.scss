@@ -1,0 +1,42 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4000061 */
+  src: url('./cloudNotes.woff2') format('woff2'),
+  url('./clounNotes.woff') format('woff'),
+  url('./cloudNotes.ttf') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-edit:before {
+  content: "\e631";
+}
+
+.icon-eye:before {
+  content: "\e80b";
+}
+
+.icon-fullscreen:before {
+  content: "\eb99";
+}
+
+.icon-logout:before {
+  content: "\e64b";
+}
+
+.icon-notebook:before {
+  content: "\e6c2";
+}
+
+.icon-trash:before {
+  content: "\ec7b";
+}
+
+.icon-note:before {
+  content: "\e64f";
+}

@@ -1,6 +1,7 @@
 import {createApp} from 'vue';
 import {createPinia} from 'pinia';
 import './style.scss';
+import './assets/iconfont.scss';
 import App from './App.vue';
 import router from './router';
 

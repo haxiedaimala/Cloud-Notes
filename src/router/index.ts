@@ -1,6 +1,6 @@
 import {createRouter, createWebHashHistory} from 'vue-router';
-import Login from '../views/Login.vue';
 
+const Login = () => import('../views/Login.vue');
 const NoteBooks = () => import('../views/NotebookList.vue');
 const Note = () => import('../views/NoteDetail.vue');
 const Trash = () => import('../views/TrashDetail.vue');
@@ -9,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/notebooks'
     },
     {
       path: '/login',
