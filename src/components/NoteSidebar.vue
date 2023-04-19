@@ -17,13 +17,35 @@ onBeforeMount(() => {
   notebookStore.getNotebooks()
       .then(() => {
         notebookStore.setCurrentBookId({notebookId: parseInt(route.query.notebookId as string)});
-        noteStore.getNotes({notebookId: currentBook.value!.id});
+        return noteStore.getNotes({notebookId: currentBook.value!.id});
+      })
+      .then(() => {
+        return noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
+      })
+      .then(() => {
+        router.replace({
+          path: '/note',
+          query: {
+            noteId: currentNote.value?.id,
+            notebookId: currentBook.value?.id
+          }
+        });
       });
 });
 const handleCommand = (command: string | number | object) => {
   if (command === 'trash') return router.push({path: '/trash'});
   notebookStore.setCurrentBookId({notebookId: command as number});
-  noteStore.getNotes({notebookId: command as number});
+  noteStore.getNotes({notebookId: command as number})
+      .then(() => {
+        noteStore.setCurrentNoteId();
+        router.replace({
+          path: '/note',
+          query: {
+            noteId: currentNote.value?.id,
+            notebookId: currentBook.value?.id
+          }
+        });
+      });
 };
 const onCreateNote = () => {
   if (currentBook.value === undefined) return;

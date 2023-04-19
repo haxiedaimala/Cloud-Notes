@@ -11,7 +11,7 @@ export const useNoteStore = defineStore('note', () => {
   const notes = computed(() => noteList.value);
   const currentNote = computed(() => {
     if (noteList.value.length === 0) return;
-    if (currentNoteId.value === null) return;
+    if (!currentNoteId.value) return notes.value[0];
     return notes.value.find(note => note.id === currentNoteId.value);
   });
 
@@ -50,8 +50,7 @@ export const useNoteStore = defineStore('note', () => {
       });
   }
 
-  function setCurrentNoteId({noteId}: { noteId: number }) {
-    if (isNaN(noteId)) return;
+  function setCurrentNoteId({noteId}: { [noteId: string]: number } = {}) {
     currentNoteId.value = noteId;
   }
 
