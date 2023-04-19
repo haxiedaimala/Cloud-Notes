@@ -17,7 +17,8 @@ onBeforeMount(() => {
   notebookStore.getNotebooks()
       .then(() => {
         notebookStore.setCurrentBookId({notebookId: parseInt(route.query.notebookId as string)});
-        return noteStore.getNotes({notebookId: currentBook.value!.id});
+        if (!currentBook.value) return;
+        return noteStore.getNotes({notebookId: currentBook.value.id});
       })
       .then(() => {
         return noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
@@ -69,10 +70,12 @@ watchPostEffect(() => {
 <template>
   <div class="note-sidebar">
     <div class="note-head">
-      <span class="note-add" @click="onCreateNote">添加笔记</span>
-      <el-dropdown class="notebook-title" @command="handleCommand" max-height="80vh">
+      <span v-if="currentBook" class="note-add" @click="onCreateNote">添加笔记</span>
+      <span v-if="!currentBook" class="notebook-title">无笔记本</span>
+      <el-dropdown v-if="currentBook" class="notebook-title" @command="handleCommand" max-height="80vh">
         <span class="el-dropdown-link">
-         {{ currentBook && currentBook.title }}<el-icon class="el-icon--right"><arrow-down/></el-icon>
+          <span class="title">{{ currentBook && currentBook.title }}</span>
+         <el-icon class="el-icon--right"><arrow-down/></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -136,14 +139,25 @@ watchPostEffect(() => {
     }
 
     .notebook-title {
+      display: flex;
+      flex: 1;
+      justify-content: center;
       font-size: 16px;
       color: #333;
 
       .el-dropdown-link {
-        cursor: pointer;
         display: flex;
+        justify-content: center;
         align-items: center;
+        width: 50%;
+        cursor: pointer;
         outline: none;
+
+        .title {
+          @extend %single-line-ellipsis;
+          width: 50%;
+          text-align: center;
+        }
       }
     }
   }
@@ -186,14 +200,15 @@ watchPostEffect(() => {
 
       a {
         display: flex;
+        align-items: center;
         padding: 0.6em 0;
         font-size: 12px;
 
         span {
-          display: flex;
-          justify-content: center;
+          @extend %single-line-ellipsis;
           flex: 1;
           padding: 0 1em;
+          text-align: center;
         }
       }
     }

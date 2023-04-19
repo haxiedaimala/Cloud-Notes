@@ -1,4 +1,12 @@
 /// <reference types="vite/client" />
+interface MockCurrentNote {
+  title: string,
+  content: string,
+  id?: number,
+  friendlyUpdatedAt?: string,
+  friendlyCreateAt?: string
+}
+
 interface UserInfo {
   createdAt: string,
   id: number

@@ -10,10 +10,10 @@ export const useNoteStore = defineStore('note', () => {
   const currentNoteId = ref<number | null>(null);
   //getters
   const notes = computed(() => noteList.value);
-  const currentNote = computed(() => {
-    if (noteList.value.length === 0) return;
-    if (!currentNoteId.value) return notes.value[0];
-    return notes.value.find(note => note.id === currentNoteId.value);
+  const currentNote = computed<NoteItem | MockCurrentNote>(() => {
+    if (noteList.value.length === 0) return {title: '', content: ''};
+    if (!currentNoteId.value) return notes.value[0] || {title: '', content: ''};
+    return notes.value.find(note => note.id === currentNoteId.value) || {title: '', content: ''};
   });
 
   //actions

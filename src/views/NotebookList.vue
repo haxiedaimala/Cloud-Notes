@@ -77,6 +77,8 @@ const onDelete = (notebook: NotebookItem) => {
 </template>
 
 <style lang="scss" scoped>
+@import "../assets/helper";
+
 .notebooks-wrapper {
   flex: 1;
   display: flex;
@@ -138,6 +140,7 @@ const onDelete = (notebook: NotebookItem) => {
         }
 
         .notebook-title {
+          @extend %single-line-ellipsis;
           flex: 1;
           font-weight: 550;
           color: #666;

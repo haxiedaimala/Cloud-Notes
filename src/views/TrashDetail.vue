@@ -93,9 +93,11 @@ const onRevertNote = () => {
         <div class="trash-bar">
           <span>创建日期：{{ currentTrashNote.friendlyCreateAt }}</span>
           <span>更新日期：{{ currentTrashNote.friendlyUpdatedAt }}</span>
-          <span>所属笔记本：{{ belongTo }}</span>
-          <span class="actions" @click="onRevertNote">恢复</span>
-          <span class="actions" @click="onDeleteNote">彻底删除</span>
+          <span class="belongTo">所属笔记本：{{ belongTo }}</span>
+          <span class="actions">
+            <span @click="onRevertNote">恢复</span>
+            <span @click="onDeleteNote">彻底删除</span>
+          </span>
         </div>
         <div class="note-title">{{ currentTrashNote.title }}</div>
         <div class="note-editor markdown-body" v-html="markdown"/>
@@ -167,14 +169,15 @@ const onRevertNote = () => {
 
         a {
           display: flex;
+          align-items: center;
           padding: 0.6em 0;
           font-size: 12px;
 
           span {
-            display: flex;
-            justify-content: center;
+            @extend %single-line-ellipsis;
             flex: 1;
             padding: 0 1em;
+            text-align: center;
           }
         }
       }
@@ -200,25 +203,25 @@ const onRevertNote = () => {
     }
 
     .trash-bar {
-      padding: 0 1.5em;
-      line-height: 3em;
+      display: flex;
+      align-items: center;
+      padding: 0.6em 1.5em;
       border-bottom: 1px solid #eee;
       font-size: 12px;
       color: #999;
 
-      &::after {
-        content: '';
-        clear: both;
-        display: block;
+      .belongTo {
+        @extend %single-line-ellipsis;
+        flex: 1;
       }
 
       .actions {
-        float: right;
-        cursor: pointer;
+        margin-left: auto;
+        margin-right: 2em;
       }
 
       span + span {
-        margin-left: 1em;
+        margin-left: 1.5em;
       }
     }
 

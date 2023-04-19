@@ -6,3 +6,9 @@
     display: none; /* Chrome Safari */
   }
 }
+
+%single-line-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

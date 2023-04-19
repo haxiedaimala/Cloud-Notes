@@ -102,7 +102,7 @@ const onSubmit = () => {
 
     .login-container {
       display: flex;
-      width: 60%;
+      width: 650px;
       height: 80%;
       margin: 0 auto;
       background-color: #36bc64;

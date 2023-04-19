@@ -7,23 +7,20 @@ import MarkdownIt from 'markdown-it';
 import 'github-markdown-css';
 import {useNoteStore} from '../store/note';
 import {useAuthStore} from '../store/auth';
+import {useNotebookStore} from '../store/notebook';
 
-type CurrentNote = {
-  title: '',
-  content: '',
-  friendlyCreateAt?: string,
-  friendlyUpdatedAt?: string,
-}
 const noteStore = useNoteStore();
-const authStore=useAuthStore()
-const currentNote = computed<NoteItem | CurrentNote>(() => noteStore.currentNote || {title: '', content: ''});
+const authStore = useAuthStore();
+const notebookStore = useNotebookStore();
+const currentNote = computed(() => noteStore.currentNote);
+const currentBook = computed(() => notebookStore.currentBook);
 const route = useRoute();
 const router = useRouter();
 const statusText = ref('未改动');
 const isPreview = ref(false);
 const markdown = computed(() => new MarkdownIt().render(currentNote.value.content));
 onBeforeMount(() => {
-  authStore.checkLogin()
+  authStore.checkLogin();
   noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
 });
 onBeforeRouteUpdate(to => {
@@ -57,18 +54,21 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
   <div class="layout">
     <NoteSidebar/>
     <div class="note-detail">
-      <template v-if="!currentNote.id">
-        <div class="note-empty">请选择笔记</div>
-      </template>
-      <template v-else>
+      <div class="note-empty" v-if="!currentBook">请先创建笔记本</div>
+      <div class="note-empty" v-else-if="!currentNote.hasOwnProperty('id')">选择或创建笔记</div>
+      <template v-if="currentNote.hasOwnProperty('id')">
         <div class="note-bar">
           <span>创建日期：{{ currentNote.friendlyCreateAt }}</span>
           <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
           <span>{{ statusText }}</span>
-          <span class="icon-wrapper" @click="onDeleteNote"><i class="iconfont icon-trash"/></span>
-          <span class="icon-wrapper" @click="onTogglePreview">
-            <i class="iconfont" :class="{'icon-eye':!isPreview,'icon-edit':isPreview}"/>
-          </span>
+          <span class="actions">
+            <span class="icon-wrapper" @click="onDeleteNote">
+              <i class="iconfont icon-trash"/>
+            </span>
+            <span class="icon-wrapper" @click="onTogglePreview">
+              <i class="iconfont" :class="{'icon-eye':!isPreview,'icon-edit':isPreview}"/>
+            </span>
+         </span>
         </div>
         <input type="text"
                class="note-title"
@@ -116,23 +116,21 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
     }
 
     .note-bar {
-      padding: 0.4em 1.5em;
+      display: flex;
+      align-items: center;
+      padding: 0.6em 1.5em;
       border-bottom: 1px solid #eee;
-
-      &::after {
-        content: '';
-        clear: both;
-        display: block;
-      }
+      font-size: 12px;
+      color: #999;
 
       span {
-        font-size: 12px;
-        color: #999;
+        @extend %single-line-ellipsis;
 
-        &.icon-wrapper {
-          float: right;
+        &.actions {
+          margin-left: auto;
+          margin-right: 2em;
 
-          .iconfont {
+          .icon-wrapper {
             font-size: 18px;
             cursor: pointer;
           }

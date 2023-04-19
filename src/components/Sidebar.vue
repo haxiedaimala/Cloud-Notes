@@ -28,6 +28,7 @@ const onLogout = () => authStore.logout();
 
 <style lang="scss" scoped>
 .sidebar {
+  flex-shrink: 0;
   position: relative;
   width: 56px;
   text-align: center;
