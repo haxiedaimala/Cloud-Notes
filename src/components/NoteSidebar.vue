@@ -49,7 +49,17 @@ const handleCommand = (command: string | number | object) => {
 };
 const onCreateNote = () => {
   if (currentBook.value === undefined) return;
-  noteStore.addNote({notebookId: currentBook.value.id});
+  return noteStore.addNote({notebookId: currentBook.value.id})
+      .then(() => {
+        noteStore.setCurrentNoteId();
+        router.replace({
+          path: '/note',
+          query: {
+            noteId: currentNote.value?.id,
+            notebookId: currentBook.value?.id
+          }
+        });
+      });
 };
 watchPostEffect(() => {
   noteStore.setCurrentNoteId({noteId: parseInt(route.query.noteId as string)});
