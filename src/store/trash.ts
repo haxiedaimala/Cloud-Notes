@@ -12,7 +12,7 @@ export const useTrashStore = defineStore('trash', () => {
   const trashNotes = computed(() => trashNoteList.value);
   const currentTrashNote = computed<NoteItem | undefined>(() => {
     if (trashNotes.value.length === 0) return;
-    if (currentTrashNoteId.value === null) return trashNotes.value[0];
+    if (!currentTrashNoteId.value) return trashNotes.value[0];
     return trashNotes.value.find(note => note.id === currentTrashNoteId.value);
   });
   const belongTo = computed(() => {
@@ -21,8 +21,7 @@ export const useTrashStore = defineStore('trash', () => {
   });
 
   // actions
-  function setCurrentNote({noteId}: { noteId: number }) {
-    if (isNaN(noteId)) return;
+  function setCurrentNote({noteId}: { [noteId: string]: number } = {}) {
     currentTrashNoteId.value = noteId;
   }
 

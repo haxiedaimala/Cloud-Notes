@@ -11,7 +11,7 @@ export const useNotebookStore = defineStore('notebook', () => {
   const notebooks = computed(() => notebookList.value);
   const currentBook = computed(() => {
     if (notebooks.value.length === 0) return;
-    if (currentBookId.value === null) return notebooks.value[0];
+    if (!currentBookId.value) return notebooks.value[0];
     return notebooks.value.find(notebook => notebook.id === currentBookId.value);
   });
 
@@ -50,8 +50,7 @@ export const useNotebookStore = defineStore('notebook', () => {
       });
   }
 
-  function setCurrentBookId({notebookId}: { notebookId: number }) {
-    if (isNaN(notebookId)) return;
+  function setCurrentBookId({notebookId}: { [notebookId: string]: number } = {}) {
     currentBookId.value = notebookId;
   }
 

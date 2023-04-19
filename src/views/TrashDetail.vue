@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import {storeToRefs} from 'pinia';
 import {useRoute, useRouter} from 'vue-router';
 import {useNotebookStore} from '../store/notebook';
+import {ElMessageBox} from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,21 +20,49 @@ onBeforeMount(() => {
   notebookStore.getNotebooks();
   trashStore.getTrashNotes()
       .then(() => {
-        trashStore.setCurrentNote({noteId: parseInt(route.query.noteId as string)});
+        return trashStore.setCurrentNote({noteId: parseInt(route.query.noteId as string)});
+      })
+      .then(() => {
+        router.replace({
+          path: '/trash',
+          query: {noteId: currentTrashNote.value?.id}
+        });
       });
 });
 watchPostEffect(() => {
   trashStore.setCurrentNote({noteId: parseInt(route.query.noteId as string)});
 });
 const onDeleteNote = () => {
-  trashStore.deleteTrashNote({noteId: (currentTrashNote.value as NoteItem).id}).then(() => {
-    router.replace({path: '/trash'});
-  });
+  ElMessageBox.confirm('删除后不可恢复', '确定删除吗？', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        return trashStore.deleteTrashNote({noteId: (currentTrashNote.value as NoteItem).id});
+      })
+      .then(() => {
+        return trashStore.setCurrentNote();
+      })
+      .then(() => {
+        router.replace({
+          path: '/trash',
+          query: {noteId: currentTrashNote.value?.id}
+        });
+      })
+      .catch(error => {if (error === 'cancel') return;});
 };
 const onRevertNote = () => {
-  trashStore.revertTrashNote({noteId: (currentTrashNote.value as NoteItem).id}).then(() => {
-    router.replace({path: '/trash'});
-  });
+  trashStore.revertTrashNote({noteId: (currentTrashNote.value as NoteItem).id})
+      .then(() => {
+        return trashStore.setCurrentNote();
+      })
+      .then(() => {
+        router.replace({
+          path: '/trash',
+          query: {noteId: currentTrashNote.value?.id}
+        });
+      });
 };
 </script>
 
@@ -205,6 +234,7 @@ const onRevertNote = () => {
       @extend %scroll;
       flex: 1;
       display: flex;
+      flex-direction: column;
       overflow-y: scroll;
       line-height: 1.5;
       padding: 1em 2em 2em;
