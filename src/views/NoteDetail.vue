@@ -20,7 +20,7 @@ const currentNote = computed<NoteItem | CurrentNote>(() => noteStore.currentNote
 const route = useRoute();
 const router = useRouter();
 const statusText = ref('未改动');
-const isPreview = ref(true);
+const isPreview = ref(false);
 const markdown = computed(() => new MarkdownIt().render(currentNote.value.content));
 onBeforeMount(() => {
   authStore.checkLogin()
@@ -28,7 +28,7 @@ onBeforeMount(() => {
 });
 onBeforeRouteUpdate(to => {
   statusText.value = '未改动';
-  isPreview.value = true;
+  isPreview.value = false;
   noteStore.setCurrentNoteId({noteId: parseInt(to.query.noteId as string)});
 });
 const onInput = () => antiShake(function () {

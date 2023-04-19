@@ -5,6 +5,7 @@ import {ElMessage} from 'element-plus';
 import {useNotebookStore} from './notebook';
 
 export const useTrashStore = defineStore('trash', () => {
+  const notebookStore = useNotebookStore();
   //states
   const trashNoteList = ref<NoteItem[]>([]);
   const currentTrashNoteId = ref<number | null>(null);
@@ -16,7 +17,7 @@ export const useTrashStore = defineStore('trash', () => {
     return trashNotes.value.find(note => note.id === currentTrashNoteId.value);
   });
   const belongTo = computed(() => {
-    const notebook = useNotebookStore().notebooks.find(notebook => notebook.id === currentTrashNote.value!.notebookId);
+    const notebook = notebookStore.notebooks.find(notebook => notebook.id === currentTrashNote.value!.notebookId);
     return notebook === undefined ? '' : notebook.title;
   });
 
@@ -35,7 +36,9 @@ export const useTrashStore = defineStore('trash', () => {
   function deleteTrashNote({noteId}: { noteId: number }) {
     return Trash.deleteNote({noteId})
       .then(data => {
+        const findNote = trashNotes.value.find(item => item.id === noteId)!;
         trashNoteList.value = trashNoteList.value.filter(note => note.id !== noteId);
+        notebookStore.notebooks.find(item => item.id === findNote.notebookId)!.noteCounts -= 1;
         ElMessage.success((data as DeleteTrashNote).msg);
       });
   }

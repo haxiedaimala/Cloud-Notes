@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {computed, ref} from 'vue';
 import Notes from '../api/notes';
 import {ElMessage} from 'element-plus';
+import {useNotebookStore} from './notebook';
 
 export const useNoteStore = defineStore('note', () => {
   //states
@@ -27,7 +28,9 @@ export const useNoteStore = defineStore('note', () => {
     return Notes.addNote({notebookId})
       .then(data => {
         const result = data as CreateNote;
+        const notebookStore = useNotebookStore();
         noteList.value.unshift(result.data!);
+        notebookStore.notebooks.find(notebook => notebook.id === notebookId)!.noteCounts += 1;
         ElMessage.success((result.msg));
       });
   }
