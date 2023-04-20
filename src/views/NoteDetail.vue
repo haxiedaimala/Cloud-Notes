@@ -62,11 +62,11 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
           <span>更新日期：{{ currentNote.friendlyUpdatedAt }}</span>
           <span>{{ statusText }}</span>
           <span class="actions">
-            <span class="icon-wrapper" @click="onDeleteNote">
-              <i class="iconfont icon-trash"/>
-            </span>
             <span class="icon-wrapper" @click="onTogglePreview">
               <i class="iconfont" :class="{'icon-eye':!isPreview,'icon-edit':isPreview}"/>
+            </span>
+             <span class="icon-wrapper" @click="onDeleteNote">
+              <i class="iconfont icon-trash"/>
             </span>
          </span>
         </div>
