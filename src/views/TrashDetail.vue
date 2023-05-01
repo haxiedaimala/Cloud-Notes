@@ -64,12 +64,35 @@ const onRevertNote = () => {
         });
       });
 };
+const onDeleteAll = () => {
+  ElMessageBox.confirm('删除后不可恢复', '全部删除吗？', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        return trashStore.deleteAllTrashNote();
+      })
+      .then(() => {
+        return trashStore.setCurrentNote();
+      })
+      .then(() => {
+        router.replace({
+          path: '/trash',
+          query: {noteId: currentTrashNote.value?.id}
+        });
+      })
+      .catch(error => {if (error === 'cancel') return;});
+};
 </script>
 
 <template>
   <div class="layout">
     <div class="trash-sidebar">
-      <div class="trash-head">回收站</div>
+      <div class="trash-head">
+        <span>回收站</span>
+        <span v-if="trashNotes" class="note-deleteAll" @click="onDeleteAll">全部删除</span>
+      </div>
       <div class="menu">
         <span>更新时间</span>
         <span>标题</span>
@@ -86,7 +109,10 @@ const onRevertNote = () => {
       </ul>
     </div>
     <div class="trash-detail">
-      <template v-if="currentTrashNote===undefined">
+      <template v-if="trashNotes.length===0">
+        <div class="trash-empty">暂无回收笔记</div>
+      </template>
+      <template v-else-if="currentTrashNote===undefined">
         <div class="trash-empty">请选择笔记</div>
       </template>
       <template v-else>
@@ -122,6 +148,7 @@ const onRevertNote = () => {
     @extend %scroll;
 
     .trash-head {
+      position: relative;
       font-size: 16px;
       display: flex;
       align-items: center;
@@ -129,6 +156,18 @@ const onRevertNote = () => {
       padding: 0.8em 0;
       background-color: #f7f7f7;
       border-bottom: 1px solid #ccc;
+
+      .note-deleteAll {
+        position: absolute;
+        top: 50%;
+        right: 0.4em;
+        z-index: 10;
+        transform: translate(0, -50%);
+        color: #666;
+        font-size: 12px;
+        padding: 0.4em;
+        cursor: pointer;
+      }
     }
 
     .menu {
@@ -218,6 +257,10 @@ const onRevertNote = () => {
       .actions {
         margin-left: auto;
         margin-right: 2em;
+
+        span {
+          cursor: pointer;
+        }
       }
 
       span + span {
