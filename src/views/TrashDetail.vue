@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onBeforeMount, watchPostEffect} from 'vue';
+import {computed, onBeforeMount, ref, watchPostEffect} from 'vue';
 import {useAuthStore} from '../store/auth';
 import {useTrashStore} from '../store/trash';
 import MarkdownIt from 'markdown-it';
@@ -85,6 +85,25 @@ const onDeleteAll = () => {
       })
       .catch(error => {if (error === 'cancel') return;});
 };
+
+const isShowSelected = ref(false);
+const selectedTrashNoteList = ref<NoteItem[]>([]);
+const onToggleSelected = () => isShowSelected.value = !isShowSelected.value;
+const onInputSelected = (note: NoteItem) => {
+  const index = selectedTrashNoteList.value.indexOf(note);
+  if (index < 0) {
+    selectedTrashNoteList.value.push(note);
+  } else {
+    selectedTrashNoteList.value.splice(index, 1);
+  }
+};
+const onDeleteSelected = () => {
+  trashStore.deleteSelectedTrashNote({noteList: selectedTrashNoteList.value})
+      .then(() => {
+        isShowSelected.value = false;
+        selectedTrashNoteList.value = [];
+      });
+};
 </script>
 
 <template>
@@ -92,7 +111,11 @@ const onDeleteAll = () => {
     <div class="trash-sidebar">
       <div class="trash-head">
         <span>回收站</span>
-        <span v-if="trashNotes" class="note-deleteAll" @click="onDeleteAll">全部删除</span>
+        <span v-if="trashNotes" class="note-deleteAll">
+          <span @click="onToggleSelected">选择</span>
+          <span v-show="!isShowSelected">/</span>
+          <span v-show="!isShowSelected" @click="onDeleteAll">全删</span>
+        </span>
       </div>
       <div class="menu">
         <span>更新时间</span>
@@ -103,11 +126,22 @@ const onDeleteAll = () => {
             :key="note.id"
             :class="{active:currentTrashNote && note.id===currentTrashNote.id}">
           <router-link :to="`/trash?noteId=${note.id}`">
-            <span class="note-date">{{ note.friendlyUpdatedAt }}</span>
+            <span class="note-date">
+              <input type="checkbox"
+                     name="trashNote"
+                     v-if="isShowSelected"
+                     @click.stop="onInputSelected(note)"
+                     :checked="selectedTrashNoteList.indexOf(note)>=0"
+              />
+              {{ note.friendlyUpdatedAt }}
+            </span>
             <span class="note-title">{{ note.title }}</span>
           </router-link>
         </li>
       </ul>
+      <div class="selected-note" v-if="isShowSelected" @click="onDeleteSelected">
+        <i class="iconfont icon-trash"/>
+      </div>
     </div>
     <div class="trash-detail">
       <template v-if="trashNotes.length===0">
@@ -148,6 +182,7 @@ const onDeleteAll = () => {
     border-right: 1px solid #ccc;
     overflow-y: scroll;
     @extend %scroll;
+    position: relative;
 
     .trash-head {
       position: relative;
@@ -221,6 +256,24 @@ const onDeleteAll = () => {
             text-align: center;
           }
         }
+      }
+    }
+
+    .selected-note {
+      position: absolute;
+      bottom: 3em;
+      right: 2em;
+      width: 3em;
+      height: 3em;
+      line-height: 3em;
+      text-align: center;
+      background-color: rgba(#999, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+
+      i {
+        font-size: 1.5em;
+        color: #999;
       }
     }
   }

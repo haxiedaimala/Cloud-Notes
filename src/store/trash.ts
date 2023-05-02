@@ -58,6 +58,21 @@ export const useTrashStore = defineStore('trash', () => {
       });
   }
 
+  function deleteSelectedTrashNote({noteList}: { noteList: NoteItem[] }) {
+    let selectedArr: Promise<unknown>[] = [];
+    for (const noteItem of noteList) {
+      selectedArr.push(Trash.deleteNote({noteId: noteItem.id}));
+    }
+    return Promise.all(selectedArr)
+      .then(data => {
+        for (const noteItem of noteList) {
+          notebookStore.notebooks.find(item => item.id === noteItem.notebookId)!.noteCounts -= 1;
+          trashNoteList.value = trashNoteList.value.filter(note => note.id !== noteItem.id);
+        }
+        ElMessage.success((data as DeleteTrashNote[])[0].msg);
+      });
+  }
+
   function revertTrashNote({noteId}: { noteId: number }) {
     return Trash.revertNote({noteId})
       .then(data => {
@@ -75,5 +90,6 @@ export const useTrashStore = defineStore('trash', () => {
     deleteTrashNote,
     revertTrashNote,
     deleteAllTrashNote,
+    deleteSelectedTrashNote,
   };
 });
