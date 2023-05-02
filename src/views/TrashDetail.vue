@@ -3,6 +3,7 @@ import {computed, onBeforeMount, watchPostEffect} from 'vue';
 import {useAuthStore} from '../store/auth';
 import {useTrashStore} from '../store/trash';
 import MarkdownIt from 'markdown-it';
+import 'github-markdown-css';
 import {storeToRefs} from 'pinia';
 import {useRoute, useRouter} from 'vue-router';
 import {useNotebookStore} from '../store/notebook';
@@ -138,6 +139,7 @@ const onDeleteAll = () => {
 .layout {
   flex: 1;
   display: flex;
+  overflow-y: auto;
 
   .trash-sidebar {
     display: flex;
@@ -277,10 +279,7 @@ const onDeleteAll = () => {
     }
 
     .note-editor {
-      @extend %scroll;
       flex: 1;
-      display: flex;
-      flex-direction: column;
       overflow-y: scroll;
       line-height: 1.5;
       padding: 1em 2em 2em;

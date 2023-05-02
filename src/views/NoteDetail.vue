@@ -96,6 +96,7 @@ const onTogglePreview = () => isPreview.value = !isPreview.value;
 .layout {
   flex: 1;
   display: flex;
+  overflow-y: auto;
 
   .note-detail {
     position: relative;
