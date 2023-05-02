@@ -65,19 +65,20 @@ const onRevertNote = () => {
         });
       });
 };
-const onDeleteAll = () => {
+const deleteNotes = ({noteList}: { [noteList: string]: NoteItem[] } = {noteList: trashNotes.value}, callback?: () => void) => {
   ElMessageBox.confirm('删除后不可恢复', '全部删除吗？', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
   })
       .then(() => {
-        return trashStore.deleteAllTrashNote();
+        return trashStore.deleteAllTrashNote({noteList});
       })
       .then(() => {
         return trashStore.setCurrentNote();
       })
       .then(() => {
+        callback ? callback() : '';
         router.replace({
           path: '/trash',
           query: {noteId: currentTrashNote.value?.id}
@@ -85,10 +86,14 @@ const onDeleteAll = () => {
       })
       .catch(error => {if (error === 'cancel') return;});
 };
+const onDeleteAll = () => deleteNotes();
 
 const isShowSelected = ref(false);
 const selectedTrashNoteList = ref<NoteItem[]>([]);
-const onToggleSelected = () => isShowSelected.value = !isShowSelected.value;
+const onToggleSelected = () => {
+  isShowSelected.value = !isShowSelected.value;
+  selectedTrashNoteList.value = [];
+};
 const onInputSelected = (note: NoteItem) => {
   const index = selectedTrashNoteList.value.indexOf(note);
   if (index < 0) {
@@ -98,11 +103,10 @@ const onInputSelected = (note: NoteItem) => {
   }
 };
 const onDeleteSelected = () => {
-  trashStore.deleteSelectedTrashNote({noteList: selectedTrashNoteList.value})
-      .then(() => {
-        isShowSelected.value = false;
-        selectedTrashNoteList.value = [];
-      });
+  deleteNotes({noteList: selectedTrashNoteList.value}, () => {
+    isShowSelected.value = false;
+    selectedTrashNoteList.value = [];
+  });
 };
 </script>
 
@@ -111,11 +115,11 @@ const onDeleteSelected = () => {
     <div class="trash-sidebar">
       <div class="trash-head">
         <span>回收站</span>
-        <span v-if="trashNotes" class="note-deleteAll">
-          <span @click="onToggleSelected">选择</span>
-          <span v-show="!isShowSelected">/</span>
+        <div v-if="trashNotes.length>0" class="note-deleteAll">
           <span v-show="!isShowSelected" @click="onDeleteAll">全删</span>
-        </span>
+          <span v-show="!isShowSelected"> / </span>
+          <span @click="onToggleSelected">选择</span>
+        </div>
       </div>
       <div class="menu">
         <span>更新时间</span>
@@ -254,6 +258,17 @@ const onDeleteSelected = () => {
             flex: 1;
             padding: 0 1em;
             text-align: center;
+
+            &.note-date {
+              position: relative;
+
+              input {
+                position: absolute;
+                top: 50%;
+                left: 1.5em;
+                transform: translateY(-50%);
+              }
+            }
           }
         }
       }

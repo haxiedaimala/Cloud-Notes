@@ -43,31 +43,16 @@ export const useTrashStore = defineStore('trash', () => {
       });
   }
 
-  function deleteAllTrashNote() {
+  function deleteAllTrashNote({noteList}: { noteList: NoteItem[] } = {noteList: trashNotes.value}) {
     let arr: Promise<unknown>[] = [];
-    for (const trashNote of trashNotes.value) {
+    for (const trashNote of noteList) {
       arr.push(Trash.deleteNote({noteId: trashNote.id}));
     }
     return Promise.all(arr)
       .then(data => {
-        for (const trashNote of trashNotes.value) {
+        for (const trashNote of noteList) {
           notebookStore.notebooks.find(item => item.id === trashNote.notebookId)!.noteCounts -= 1;
-        }
-        trashNoteList.value = [];
-        ElMessage.success((data as DeleteTrashNote[])[0].msg);
-      });
-  }
-
-  function deleteSelectedTrashNote({noteList}: { noteList: NoteItem[] }) {
-    let selectedArr: Promise<unknown>[] = [];
-    for (const noteItem of noteList) {
-      selectedArr.push(Trash.deleteNote({noteId: noteItem.id}));
-    }
-    return Promise.all(selectedArr)
-      .then(data => {
-        for (const noteItem of noteList) {
-          notebookStore.notebooks.find(item => item.id === noteItem.notebookId)!.noteCounts -= 1;
-          trashNoteList.value = trashNoteList.value.filter(note => note.id !== noteItem.id);
+          trashNoteList.value = trashNoteList.value.filter(note => note.id !== trashNote.id);
         }
         ElMessage.success((data as DeleteTrashNote[])[0].msg);
       });
@@ -90,6 +75,5 @@ export const useTrashStore = defineStore('trash', () => {
     deleteTrashNote,
     revertTrashNote,
     deleteAllTrashNote,
-    deleteSelectedTrashNote,
   };
 });
